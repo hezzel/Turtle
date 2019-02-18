@@ -17,25 +17,10 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.interfaces;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
+public interface TurtleEvent {
+  public enum EventKind { USERCMD, MUDTEXT };
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
-
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
-      }
-    });
-  }
+  public EventKind queryEventKind();
 }

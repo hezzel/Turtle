@@ -17,25 +17,28 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.events;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
+import turtle.interfaces.TurtleEvent;
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+/**
+ * This class represents the event that text from the MUD has arrived, and is not yet parsed.
+ * This event only considers plain text, and not any telnet communication.
+ */
+public class EventMudText implements TurtleEvent {
+  private String _text;
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
-      }
-    });
+  public EventMudText(String txt) {
+    if (txt == null) throw new Error("Cannot initialise EventMudText with null!");
+    _text = txt;
+  }
+
+  public EventKind queryEventKind() {
+    return EventKind.MUDTEXT;
+  }
+
+  public String queryTest() {
+    return _text;
   }
 }
+

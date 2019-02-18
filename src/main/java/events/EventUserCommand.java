@@ -17,25 +17,27 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.events;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
+import turtle.interfaces.TurtleEvent;
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+/**
+ * This class represents the event that the user has given a command, whether that be through the
+ * input window or through other input methods (such as menus or inputfiles).
+ */
+public class EventUserCommand implements TurtleEvent {
+  private String _command;
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
-      }
-    });
+  public EventUserCommand(String cmd) {
+    if (cmd == null) throw new Error("Cannot initialise EventUserCommand with null!");
+    _command = cmd;
+  }
+
+  public EventKind queryEventKind() {
+    return EventKind.USERCMD;
+  }
+
+  public String queryCommand() {
+    return _command;
   }
 }

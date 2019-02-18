@@ -17,25 +17,15 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.interfaces;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
+public interface EventListener {
+  /**
+   * Will be checked every time an event occurs, so it is allowed for an event listener to change
+   * the output of this function during its lifetime.
+   */
+  public boolean queryInterestedIn(TurtleEvent.EventKind kind);
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
-
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
-      }
-    });
-  }
+  /** Will be called whenever an event that we are interested in occurs. */
+  public void eventOccurred(TurtleEvent event);
 }

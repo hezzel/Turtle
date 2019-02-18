@@ -19,23 +19,39 @@
 
 package turtle;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
+import java.util.ArrayList;
+import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.EventListener;
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+/**
+ * The Event Handler is told about all events, and passes them on to all listening objects.
+ * The Event Handler itself does not act on any event, and does not consider which listeners it
+ * passes the information on to.
+ */
+public class EventHandler {
+  private static ArrayList<EventListener> _listeners = new ArrayList<EventListener>();
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
+  public static void eventOccurred(TurtleEvent event) {
+    TurtleEvent.EventKind kind = event.queryEventKind();
+    for (int i = 0; i < _listeners.size(); i++) {
+      if (_listeners.get(i).queryInterestedIn(kind)) {
+        _listeners.get(i).eventOccurred(event);
       }
-    });
+    }
+  }
+
+  /**
+   * Register a new event listeners.
+   * Listeners that are already registered are ignored; they will not be notified twice on the
+   * same event.  Order of registration should not be considered indicative of calling order when
+   * an event occurs.
+   */
+  public static void registerEventListener(EventListener el) {
+    if (!_listeners.contains(el)) _listeners.add(el);
+  }
+
+  public static void removeEventListener(EventListener el) {
+    _listeners.remove(el);
   }
 }
+

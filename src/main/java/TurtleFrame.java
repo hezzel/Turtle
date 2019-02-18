@@ -17,6 +17,8 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
+package turtle;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
