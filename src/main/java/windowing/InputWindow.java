@@ -17,26 +17,37 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.windowing;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
+import javax.swing.*;
+import java.awt.event.*;
+import turtle.EventHandler;
+import turtle.events.EventUserCommand;
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+/**
+ * This class represents the textbox at the bottom of Turtle, where users input text.
+ */
+public class InputWindow {
+  JTextField _component;
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
+  public InputWindow() {
+    _component = new JTextField();
+    _component.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "enterpressed");
+    _component.getActionMap().put("enterpressed", new AbstractAction() {
+        public void actionPerformed(ActionEvent tf) {
+          enterPressed();
         }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
-      }
-    });
+      });
+  }
+
+  private void enterPressed() {
+    String text = _component.getText();
+    _component.setText("");
+    EventHandler.eventOccurred(new EventUserCommand(text));
+  }
+
+  public JComponent queryComponent() {
+    return _component;
   }
 }
+

@@ -17,9 +17,10 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.windowing;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -31,6 +32,23 @@ import static javax.swing.GroupLayout.Alignment.*;
  * Its responsibility is to show the appropriate windows to the user.
  */
 public class TurtleFrame extends JFrame {
+  private InputWindow _input;
+  private OutputWindow _output;
+  private Font _font;
+
+  /** Helper function for the constructor. */
+  private void createDefaultWindows() {
+    _output = new OutputWindow();
+    _input = new InputWindow();
+  }
+
+  /** Helper function for the constructor. */
+  private void setupDefaultFont() {
+    _font = new Font("Monospaced", Font.PLAIN, 14);
+    _input.queryComponent().setFont(_font);
+    _output.queryComponent().setFont(_font);
+  }
+
   /** Helper function for the constructor. */
   private void setupDefaultSize() {
     setState(JFrame.NORMAL);
@@ -43,8 +61,8 @@ public class TurtleFrame extends JFrame {
 
   /** Helper function for the constructor. */
   private void setupDefaultLayout() {
-    JTextPane output = new JTextPane();
-    JTextField input = new JTextField();
+    JComponent outputwindow = _output.queryComponent();
+    JComponent inputwindow = _input.queryComponent();
 
     JPanel panel = new JPanel();
     GroupLayout layout = new GroupLayout(panel);
@@ -53,13 +71,13 @@ public class TurtleFrame extends JFrame {
     layout.setAutoCreateContainerGaps(true);
 
     layout.setHorizontalGroup(layout.createParallelGroup(LEADING)
-      .addComponent(output)
-      .addComponent(input)
+      .addComponent(outputwindow)
+      .addComponent(inputwindow)
     );  
     
     layout.setVerticalGroup(layout.createSequentialGroup()
-      .addComponent(output)
-      .addComponent(input, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+      .addComponent(outputwindow)
+      .addComponent(inputwindow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                     GroupLayout.PREFERRED_SIZE)
     );  
 
@@ -84,6 +102,8 @@ public class TurtleFrame extends JFrame {
   }
 
   public TurtleFrame() {
+    createDefaultWindows();
+    setupDefaultFont();
     setupDefaultSize();
     setupDefaultLayout();
 

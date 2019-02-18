@@ -17,26 +17,45 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.windowing;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
+import java.awt.Color;
+import javax.swing.*;
+import turtle.EventHandler;
+import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.EventListener;
+import turtle.events.EventUserCommand;
 
-public class Turtle {
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+/**
+ * This class represents the main window of Turtle, where text is printed to the user.
+ */
+public class OutputWindow {
+  private JTextPane _textpane;
+  private JScrollPane _scrollpane;
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        frame.setVisible(true);
+  public OutputWindow() {
+    // set up the text field
+    _textpane = new JTextPane();
+    //_textpane.setBackground(Color.BLACK);
+    _textpane.setEditable(false);
+    // make it scrollable
+    _scrollpane = new JScrollPane(_textpane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    EventHandler.registerEventListener(new EventListener() {
+      public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
+        return kind == TurtleEvent.EventKind.USERCMD;
+      }
+
+      public void eventOccurred(TurtleEvent event) {
+        String txt = ((EventUserCommand)event).queryCommand();
+        _textpane.setText(txt);
       }
     });
   }
+
+  public JComponent queryComponent() {
+    return _scrollpane;
+  }
 }
+
