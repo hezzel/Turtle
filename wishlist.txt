@@ -1,0 +1,19 @@
+working client
+working network connection (to Discworld)
+support for ansi, xterm256, xterm16m
+clever input window
+scrolling
+commands
+aliases
+timers
+triggers
+macros
+zmp
+automapper
+tab completion
+creator features
+clever windowing system
+mxp
+categories
+character management page
+
