@@ -21,6 +21,7 @@ package turtle.windowing;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.Font;
 import turtle.EventHandler;
 import turtle.events.EventUserCommand;
 
@@ -38,6 +39,10 @@ public class InputWindow {
           enterPressed();
         }
       });
+  }
+
+  public void setFont(Font font) {
+    _component.setFont(font);
   }
 
   private void enterPressed() {

@@ -38,15 +38,15 @@ public class TurtleFrame extends JFrame {
 
   /** Helper function for the constructor. */
   private void createDefaultWindows() {
-    _output = new OutputWindow();
     _input = new InputWindow();
+    _output = new OutputWindow();
   }
 
   /** Helper function for the constructor. */
   private void setupDefaultFont() {
     _font = new Font("Monospaced", Font.PLAIN, 14);
-    _input.queryComponent().setFont(_font);
-    _output.queryComponent().setFont(_font);
+    _input.setFont(_font);
+    _output.setFont(_font);
   }
 
   /** Helper function for the constructor. */
@@ -84,6 +84,19 @@ public class TurtleFrame extends JFrame {
     add(panel);
   }
 
+  /**
+   * Helper function for the constructor:
+   * this function guarantees that the input window is given the focus whenever the frame as a
+   * whole is given the focus.
+   */
+  private void setupWindowFocus() {
+    addWindowFocusListener(new WindowAdapter() {
+      public void windowGainedFocus(WindowEvent e) {
+        _input.queryComponent().requestFocusInWindow();
+      }   
+    }); 
+  }
+
   /** Helper function for the constructor. */
   private void setupWindowClosing() {
     // handle window closing
@@ -107,6 +120,7 @@ public class TurtleFrame extends JFrame {
     setupDefaultSize();
     setupDefaultLayout();
 
+    setupWindowFocus();
     setupWindowClosing();
 
     // finalise

@@ -1,7 +1,7 @@
 working client
-  - frame
-  - output window that can print stuff (not yet in colour)
-  - input window that can send stuff (to the output window)
+  [x] frame
+  [x] input window that can send stuff (to the output window)
+  [x] output window that can print stuff (not yet in colour)
 working network connection (to Discworld)
 support for ansi, xterm256, xterm16m
 clever input window

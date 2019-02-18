@@ -20,7 +20,12 @@
 package turtle.windowing;
 
 import java.awt.Color;
+import java.awt.Font;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import turtle.EventHandler;
 import turtle.interfaces.TurtleEvent;
 import turtle.interfaces.EventListener;
@@ -36,7 +41,7 @@ public class OutputWindow {
   public OutputWindow() {
     // set up the text field
     _textpane = new JTextPane();
-    //_textpane.setBackground(Color.BLACK);
+    _textpane.setBackground(Color.BLACK);
     _textpane.setEditable(false);
     // make it scrollable
     _scrollpane = new JScrollPane(_textpane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -49,9 +54,24 @@ public class OutputWindow {
 
       public void eventOccurred(TurtleEvent event) {
         String txt = ((EventUserCommand)event).queryCommand();
-        _textpane.setText(txt);
+        addText(txt + "\n");
       }
     });
+  }
+
+  public void setFont(Font font) {
+    _textpane.setFont(font);
+  }
+
+  public void addText(String txt) {
+    StyledDocument doc = _textpane.getStyledDocument();
+    Style style = _textpane.getStyle("white");
+    if (style == null) {
+      style = _textpane.addStyle("white", null);
+      StyleConstants.setForeground(style, Color.white);
+    }
+    try { doc.insertString(doc.getLength(), txt, style); }
+    catch (BadLocationException e) {}
   }
 
   public JComponent queryComponent() {
