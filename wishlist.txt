@@ -16,4 +16,6 @@ clever windowing system
 mxp
 categories
 character management page
+help functionality
+logfiles
 
