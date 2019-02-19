@@ -25,6 +25,7 @@ import turtle.interfaces.OutputTarget;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
 import turtle.events.UserCommandEvent;
+import turtle.events.WarningEvent;
 
 /**
  * The Information Handler listens for all kinds of events that require information to be printed
@@ -42,7 +43,8 @@ public class InformationHandler implements EventListener {
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
     return kind == TurtleEvent.EventKind.USERCMD ||
            kind == TurtleEvent.EventKind.MUDTEXT ||
-           kind == TurtleEvent.EventKind.INFORMATION;
+           kind == TurtleEvent.EventKind.INFORMATION ||
+           kind == TurtleEvent.EventKind.WARNING;
   }
 
   public void eventOccurred(TurtleEvent event) {
@@ -57,6 +59,10 @@ public class InformationHandler implements EventListener {
     if (event.queryEventKind() == TurtleEvent.EventKind.INFORMATION) {
       handleInformation((InformationEvent)event);
     }
+
+    if (event.queryEventKind() == TurtleEvent.EventKind.WARNING) {
+       handleWarning((WarningEvent)event);
+    }
   }
 
   private void handleUserCommand(UserCommandEvent event) {
@@ -69,6 +75,10 @@ public class InformationHandler implements EventListener {
 
   private void handleInformation(InformationEvent event) {
     _target.print("INFO: " + event.queryText() + "\n");
+  }
+
+  private void handleWarning(WarningEvent event) {
+    _target.print("WARNING: " + event.queryText() + "\n");
   }
 }
 

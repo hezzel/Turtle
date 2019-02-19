@@ -17,16 +17,28 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.events;
+
+import turtle.interfaces.TurtleEvent;
 
 /**
- * A TurtleEvent can be raised by any object, passed to the event bus, and then passed on to any
- * listeners that may be interested.
- * Listeners will use the EventKind to cast to the classes in turtle.events that correspond to the
- * kind.  It is the intention that there is a unique mapping from EventKind to events.
+ * This class represents the event that a warning is available that needs to be printed to the
+ * user.
  */
-public interface TurtleEvent {
-  public enum EventKind { USERCMD, MUDTEXT, INFORMATION, WARNING };
+public class WarningEvent implements TurtleEvent {
+  private String _text;
 
-  public EventKind queryEventKind();
+  public WarningEvent(String txt) {
+    if (txt == null) throw new Error("Cannot initialise WarningEvent with null!");
+    _text = txt;
+  }
+
+  public EventKind queryEventKind() {
+    return EventKind.WARNING;
+  }
+
+  public String queryText() {
+    return _text;
+  }
 }
+
