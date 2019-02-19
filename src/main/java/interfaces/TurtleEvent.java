@@ -19,8 +19,14 @@
 
 package turtle.interfaces;
 
+/**
+ * A TurtleEvent can be raised by any object, passed to the event bus, and then passed on to any
+ * listeners that may be interested.
+ * Listeners will use the EventKind to cast to the classes in turtle.events that correspond to the
+ * kind.  It is the intention that there is a unique mapping from EventKind to events.
+ */
 public interface TurtleEvent {
-  public enum EventKind { USERCMD, MUDTEXT };
+  public enum EventKind { USERCMD, MUDTEXT, INFORMATION };
 
   public EventKind queryEventKind();
 }

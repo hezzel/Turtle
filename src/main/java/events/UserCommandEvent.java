@@ -17,50 +17,27 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.windowing;
+package turtle.events;
 
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import turtle.interfaces.TurtleEvent;
 
 /**
- * This class represents the main window of Turtle, where text is printed to the user.
+ * This class represents the event that the user has given a command, whether that be through the
+ * input window or through other input methods (such as menus or inputfiles).
  */
-public class OutputWindow {
-  private JTextPane _textpane;
-  private JScrollPane _scrollpane;
+public class UserCommandEvent implements TurtleEvent {
+  private String _command;
 
-  public OutputWindow() {
-    // set up the text field
-    _textpane = new JTextPane();
-    _textpane.setBackground(Color.BLACK);
-    _textpane.setEditable(false);
-    // make it scrollable
-    _scrollpane = new JScrollPane(_textpane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+  public UserCommandEvent(String cmd) {
+    if (cmd == null) throw new Error("Cannot initialise UserCommandEvent with null!");
+    _command = cmd;
   }
 
-  public void setFont(Font font) {
-    _textpane.setFont(font);
+  public EventKind queryEventKind() {
+    return EventKind.USERCMD;
   }
 
-  public void addText(String txt) {
-    StyledDocument doc = _textpane.getStyledDocument();
-    Style style = _textpane.getStyle("white");
-    if (style == null) {
-      style = _textpane.addStyle("white", null);
-      StyleConstants.setForeground(style, Color.white);
-    }
-    try { doc.insertString(doc.getLength(), txt, style); }
-    catch (BadLocationException e) {}
-  }
-
-  public JComponent queryComponent() {
-    return _scrollpane;
+  public String queryCommand() {
+    return _command;
   }
 }
-

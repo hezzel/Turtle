@@ -17,50 +17,41 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.windowing;
+package turtle;
 
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import java.util.ArrayList;
+import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.EventListener;
 
 /**
- * This class represents the main window of Turtle, where text is printed to the user.
+ * The Event Bus is told about all events, and passes them on to all listening objects.
+ * The Event Bus itself does not act on any event, and does not consider which listeners it
+ * passes the information on to.
  */
-public class OutputWindow {
-  private JTextPane _textpane;
-  private JScrollPane _scrollpane;
+public class EventBus {
+  private static ArrayList<EventListener> _listeners = new ArrayList<EventListener>();
 
-  public OutputWindow() {
-    // set up the text field
-    _textpane = new JTextPane();
-    _textpane.setBackground(Color.BLACK);
-    _textpane.setEditable(false);
-    // make it scrollable
-    _scrollpane = new JScrollPane(_textpane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-  }
-
-  public void setFont(Font font) {
-    _textpane.setFont(font);
-  }
-
-  public void addText(String txt) {
-    StyledDocument doc = _textpane.getStyledDocument();
-    Style style = _textpane.getStyle("white");
-    if (style == null) {
-      style = _textpane.addStyle("white", null);
-      StyleConstants.setForeground(style, Color.white);
+  public static void eventOccurred(TurtleEvent event) {
+    TurtleEvent.EventKind kind = event.queryEventKind();
+    for (int i = 0; i < _listeners.size(); i++) {
+      if (_listeners.get(i).queryInterestedIn(kind)) {
+        _listeners.get(i).eventOccurred(event);
+      }
     }
-    try { doc.insertString(doc.getLength(), txt, style); }
-    catch (BadLocationException e) {}
   }
 
-  public JComponent queryComponent() {
-    return _scrollpane;
+  /**
+   * Register a new event listeners.
+   * Listeners that are already registered are ignored; they will not be notified twice on the
+   * same event.  Order of registration should not be considered indicative of calling order when
+   * an event occurs.
+   */
+  public static void registerEventListener(EventListener el) {
+    if (!_listeners.contains(el)) _listeners.add(el);
+  }
+
+  public static void removeEventListener(EventListener el) {
+    _listeners.remove(el);
   }
 }
 

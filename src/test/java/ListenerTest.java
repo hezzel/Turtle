@@ -4,7 +4,7 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import turtle.EventHandler;
+import turtle.EventBus;
 import turtle.interfaces.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.events.*;
@@ -29,7 +29,7 @@ public class ListenerTest {
     public void eventOccurred(TurtleEvent event) {
       _called++;
       if (event.queryEventKind() == TurtleEvent.EventKind.USERCMD) {
-        _lastCommand = ((EventUserCommand)event).queryCommand();
+        _lastCommand = ((UserCommandEvent)event).queryCommand();
       }
     }
 
@@ -46,21 +46,21 @@ public class ListenerTest {
   public void testListener() {
     Listener l = new Listener();
 
-    EventHandler.registerEventListener(l);
-    EventHandler.eventOccurred(new EventUserCommand("X"));
+    EventBus.registerEventListener(l);
+    EventBus.eventOccurred(new UserCommandEvent("X"));
     assertTrue(l.queryCallCount() == 1);
-    EventHandler.eventOccurred(new EventUserCommand("Y"));
+    EventBus.eventOccurred(new UserCommandEvent("Y"));
     assertTrue(l.queryCallCount() == 2);
     assertTrue(l.queryLastCommand().equals("Y"));
-    EventHandler.eventOccurred(new EventMudText("Z"));
+    EventBus.eventOccurred(new MudTextEvent("Z"));
     assertTrue(l.queryCallCount() == 2);
     assertTrue(l.queryLastCommand().equals("Y"));
     l.setAllAllowed();
-    EventHandler.eventOccurred(new EventMudText("A"));
+    EventBus.eventOccurred(new MudTextEvent("A"));
     assertTrue(l.queryCallCount() == 3);
     assertTrue(l.queryLastCommand().equals("Y"));
-    EventHandler.eventOccurred(new EventUserCommand("A"));
+    EventBus.eventOccurred(new UserCommandEvent("A"));
     assertTrue(l.queryCallCount() == 4);
-    EventHandler.eventOccurred(new EventUserCommand("A"));
+    EventBus.eventOccurred(new UserCommandEvent("A"));
   }
 }

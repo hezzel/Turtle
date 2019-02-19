@@ -22,8 +22,14 @@ package turtle;
 import javax.swing.UIManager;
 import javax.swing.JFrame;
 import turtle.windowing.TurtleFrame;
+import turtle.handlers.*;
 
 public class Turtle {
+  private static void setupListeners(TurtleFrame frame) {
+    InformationHandler infh = new InformationHandler(frame);
+    EventBus.registerEventListener(infh);
+  }
+
   public static void main(String[] args) {
     java.awt.EventQueue.invokeLater(new Runnable() {
       public void run() {
@@ -35,8 +41,10 @@ public class Turtle {
           ex.printStackTrace();
         }
         TurtleFrame frame = new TurtleFrame();
+        setupListeners(frame);
         frame.setVisible(true);
       }
     });
   }
 }
+

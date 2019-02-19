@@ -26,12 +26,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
 import static javax.swing.GroupLayout.Alignment.*;
+import turtle.interfaces.OutputTarget;
 
 /**
  * This class represents the main frame of Turtle.
  * Its responsibility is to show the appropriate windows to the user.
  */
-public class TurtleFrame extends JFrame {
+public class TurtleFrame extends JFrame implements OutputTarget {
   private InputWindow _input;
   private OutputWindow _output;
   private Font _font;
@@ -112,6 +113,11 @@ public class TurtleFrame extends JFrame {
   public void quit() {
     dispose();
     System.exit(0);
+  }
+
+  /** Prints the given information to the output window. */
+  public void print(String txt) {
+    _output.addText(txt);
   }
 
   public TurtleFrame() {

@@ -22,4 +22,5 @@ character management page
 help functionality
 logfiles
 make the numpad keys work
+mccp (compression)
 

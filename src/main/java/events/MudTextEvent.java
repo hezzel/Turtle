@@ -25,11 +25,11 @@ import turtle.interfaces.TurtleEvent;
  * This class represents the event that text from the MUD has arrived, and is not yet parsed.
  * This event only considers plain text, and not any telnet communication.
  */
-public class EventMudText implements TurtleEvent {
+public class MudTextEvent implements TurtleEvent {
   private String _text;
 
-  public EventMudText(String txt) {
-    if (txt == null) throw new Error("Cannot initialise EventMudText with null!");
+  public MudTextEvent(String txt) {
+    if (txt == null) throw new Error("Cannot initialise MudTextEvent with null!");
     _text = txt;
   }
 
@@ -37,7 +37,7 @@ public class EventMudText implements TurtleEvent {
     return EventKind.MUDTEXT;
   }
 
-  public String queryTest() {
+  public String queryText() {
     return _text;
   }
 }

@@ -17,27 +17,13 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.events;
-
-import turtle.interfaces.TurtleEvent;
+package turtle.interfaces;
 
 /**
- * This class represents the event that the user has given a command, whether that be through the
- * input window or through other input methods (such as menus or inputfiles).
+ * An OutputTarget (for instance a window or logfile) is passed any information that the user may
+ * be interested in.
  */
-public class EventUserCommand implements TurtleEvent {
-  private String _command;
-
-  public EventUserCommand(String cmd) {
-    if (cmd == null) throw new Error("Cannot initialise EventUserCommand with null!");
-    _command = cmd;
-  }
-
-  public EventKind queryEventKind() {
-    return EventKind.USERCMD;
-  }
-
-  public String queryCommand() {
-    return _command;
-  }
+public interface OutputTarget {
+  public void print(String txt);
 }
+

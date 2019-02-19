@@ -17,41 +17,58 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.handlers;
 
-import java.util.ArrayList;
 import turtle.interfaces.TurtleEvent;
 import turtle.interfaces.EventListener;
+import turtle.interfaces.OutputTarget;
+import turtle.events.InformationEvent;
+import turtle.events.MudTextEvent;
+import turtle.events.UserCommandEvent;
 
 /**
- * The Event Handler is told about all events, and passes them on to all listening objects.
- * The Event Handler itself does not act on any event, and does not consider which listeners it
- * passes the information on to.
+ * The Information Handler listens for all kinds of events that require information to be printed
+ * to the user; whether it is through InformationEvents or because there is text from the MUD or
+ * anything that warrants informing the user about.
+ * It is very possible that some of these events are additionally handled by other event listeners.
  */
-public class EventHandler {
-  private static ArrayList<EventListener> _listeners = new ArrayList<EventListener>();
+public class InformationHandler implements EventListener {
+  private OutputTarget _target;
 
-  public static void eventOccurred(TurtleEvent event) {
-    TurtleEvent.EventKind kind = event.queryEventKind();
-    for (int i = 0; i < _listeners.size(); i++) {
-      if (_listeners.get(i).queryInterestedIn(kind)) {
-        _listeners.get(i).eventOccurred(event);
-      }
+  public InformationHandler(OutputTarget output) {
+    _target = output;
+  }
+
+  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
+    return kind == TurtleEvent.EventKind.USERCMD ||
+           kind == TurtleEvent.EventKind.MUDTEXT ||
+           kind == TurtleEvent.EventKind.INFORMATION;
+  }
+
+  public void eventOccurred(TurtleEvent event) {
+    if (event.queryEventKind() == TurtleEvent.EventKind.USERCMD) {
+      handleUserCommand((UserCommandEvent)event);
+    }
+
+    if (event.queryEventKind() == TurtleEvent.EventKind.MUDTEXT) {
+      handleMudText((MudTextEvent)event);
+    }
+
+    if (event.queryEventKind() == TurtleEvent.EventKind.INFORMATION) {
+      handleInformation((InformationEvent)event);
     }
   }
 
-  /**
-   * Register a new event listeners.
-   * Listeners that are already registered are ignored; they will not be notified twice on the
-   * same event.  Order of registration should not be considered indicative of calling order when
-   * an event occurs.
-   */
-  public static void registerEventListener(EventListener el) {
-    if (!_listeners.contains(el)) _listeners.add(el);
+  private void handleUserCommand(UserCommandEvent event) {
+    _target.print("USER: " + event.queryCommand() + "\n");
   }
 
-  public static void removeEventListener(EventListener el) {
-    _listeners.remove(el);
+  private void handleMudText(MudTextEvent event) {
+    _target.print("MUD: " + event.queryText() + "\n");
+  }
+
+  private void handleInformation(InformationEvent event) {
+    _target.print("INFO: " + event.queryText() + "\n");
   }
 }
 

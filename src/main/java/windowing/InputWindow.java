@@ -22,8 +22,8 @@ package turtle.windowing;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.Font;
-import turtle.EventHandler;
-import turtle.events.EventUserCommand;
+import turtle.EventBus;
+import turtle.events.UserCommandEvent;
 
 /**
  * This class represents the textbox at the bottom of Turtle, where users input text.
@@ -48,7 +48,7 @@ public class InputWindow {
   private void enterPressed() {
     String text = _component.getText();
     _component.setText("");
-    EventHandler.eventOccurred(new EventUserCommand(text));
+    EventBus.eventOccurred(new UserCommandEvent(text));
   }
 
   public JComponent queryComponent() {
