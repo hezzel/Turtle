@@ -17,38 +17,32 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.interfaces;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+/**
+ * A ConnectionListener is a class that is interested in a given connection.
+ * The listener is responsible for taking care of responding in the right thread.
+ */
+public interface ConnectionListener {
+  /** Used if the connection runs into errors and is broken non-neatly. */
+  public void connectionFailed(String error);
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
-  }
+  /**
+   * Used if the connection is ended without errors either the server (remote = true) or by request
+   * command (if remote = false).
+   */
+  public void connectionClosed(boolean remote);
 
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+  /** Used when the connection is starting the blocking actions associated with connecting. */
+  public void connectionStarting(String host, int port);
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
-  }
+  /** Used when the connection has successfully been established. */
+  public void connectionEstablished(String host, String address, int port);
+
+  /** Used when an IP address is found. */
+  public void connectionFoundAddress(String host, String address, int port);
+
+  /** Used when the connection has received text from the server. */
+  public void connectionReceivedText(String text);
 }
 
