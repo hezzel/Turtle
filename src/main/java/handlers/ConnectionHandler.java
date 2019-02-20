@@ -97,13 +97,8 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
 
   /** Called when the connection is closed without errors. */
   public void connectionClosed(boolean remote) {
-    if (remote) sendInformation("Remote server closed the connection.");
+    if (remote) sendInformation("The remote server has closed the connection.");
     _connection = null;
-  }
-
-  /** Called when the connection is starting to connect. */
-  public void connectionStarting(String host, int port) {
-    sendInformation("Seeking a connection to " + host + "...");
   }
 
   /** Called when the connection has successfully been established. */
@@ -117,8 +112,8 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
   }
 
   /** Called when the connection has acquired text from the server. */
-  public void connectionReceivedText(String text) {
-    sendMudText(text);
+  public void connectionReceivedContent(char[] text, int length) {
+    sendMudText(new String(text, 0, length));
   }
 }
 

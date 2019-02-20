@@ -33,16 +33,13 @@ public interface ConnectionListener {
    */
   public void connectionClosed(boolean remote);
 
-  /** Used when the connection is starting the blocking actions associated with connecting. */
-  public void connectionStarting(String host, int port);
-
   /** Used when the connection has successfully been established. */
   public void connectionEstablished(String host, String address, int port);
 
   /** Used when an IP address is found. */
   public void connectionFoundAddress(String host, String address, int port);
 
-  /** Used when the connection has received text from the server. */
-  public void connectionReceivedText(String text);
+  /** Used when the connection has received content from the server. */
+  public void connectionReceivedContent(char[] text, int length);
 }
 

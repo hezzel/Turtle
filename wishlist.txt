@@ -1,8 +1,6 @@
-working client
-  [x] frame
-  [x] input window that can send stuff (to the output window)
-  [x] output window that can print stuff (not yet in colour)
-working network connection (to Discworld)
+[x] working client
+[x] working network connection (to Discworld)
+telnet negotiation
 support for ansi, xterm256, xterm16m
 clever input window
 scrolling

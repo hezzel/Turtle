@@ -82,7 +82,6 @@ public class Connection extends Thread {
   }
 
   private InetAddress lookupAddress() {
-    _listener.connectionStarting(_host, _port);
     InetAddress address;
     try { address = InetAddress.getByName(_host); }
     catch (UnknownHostException e) { address = null; }
@@ -145,7 +144,7 @@ public class Connection extends Thread {
         _ended = true;
       }
       else {
-        _listener.connectionReceivedText(new String(buffer, 0, num));
+        _listener.connectionReceivedContent(buffer, num);
       }
     } catch (IOException e) {}  // typically just a timeout
   }
