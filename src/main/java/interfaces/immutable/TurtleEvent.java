@@ -17,16 +17,21 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.interfaces.immutable;
 
 /**
  * A TurtleEvent can be raised by any object, passed to the event bus, and then passed on to any
  * listeners that may be interested.
- * Listeners will use the EventKind to cast to the classes in turtle.events that correspond to the
- * kind.  It is the intention that there is a unique mapping from EventKind to events.
+ * Listeners will use the EventKind to cast to the classes in turtle.immutable.events that
+ * correspond to the kind.  It is the intention that there is a unique mapping from EventKind to
+ * events.
  */
 public interface TurtleEvent {
-  public enum EventKind { USERCMD, MUDTEXT, INFORMATION, WARNING };
+  public enum EventKind { USERCMD, // a command (string) to be parsed: UserCommandEvent
+                          MUDTEXT, // text arriving from the server: MudTextEvent
+                          INFORMATION, // information is available for printing: InformationEvent
+                          WARNING, // something encountered a (minor) problem: WarningEvent
+                        };
 
   public EventKind queryEventKind();
 }

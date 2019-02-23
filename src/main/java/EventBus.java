@@ -20,7 +20,7 @@
 package turtle;
 
 import java.util.ArrayList;
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 
 /**

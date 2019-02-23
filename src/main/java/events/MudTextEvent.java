@@ -19,7 +19,7 @@
 
 package turtle.events;
 
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 
 /**
  * This class represents the event that text from the MUD has arrived, and is not yet parsed.

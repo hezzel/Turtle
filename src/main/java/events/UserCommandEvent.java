@@ -19,7 +19,7 @@
 
 package turtle.events;
 
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 
 /**
  * This class represents the event that the user has given a command, whether that be through the

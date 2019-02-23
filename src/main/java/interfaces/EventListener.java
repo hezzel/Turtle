@@ -19,6 +19,8 @@
 
 package turtle.interfaces;
 
+import turtle.interfaces.immutable.TurtleEvent;
+
 public interface EventListener {
   /**
    * Will be checked every time an event occurs, so it is allowed for an event listener to change

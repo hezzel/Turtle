@@ -1,0 +1,4 @@
+The immutable interfaces are all interfaces for immutable data structures.  These data structures
+can be shared freely, and calling any of their functions is guaranteed not to have any side
+effects.
+

@@ -19,7 +19,7 @@
 
 package turtle.events;
 
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 
 /**
  * This class represents the event that some information is available that needs to be printed to

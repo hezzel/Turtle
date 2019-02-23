@@ -19,7 +19,7 @@
 
 package turtle.handlers;
 
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.OutputTarget;
 import turtle.events.InformationEvent;

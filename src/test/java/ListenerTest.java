@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import turtle.EventBus;
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.events.*;
 

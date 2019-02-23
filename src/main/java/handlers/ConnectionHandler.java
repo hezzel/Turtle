@@ -20,7 +20,7 @@
 package turtle.handlers;
 
 import java.awt.EventQueue;
-import turtle.interfaces.TurtleEvent;
+import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.ConnectionListener;
 import turtle.EventBus;
