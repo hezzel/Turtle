@@ -46,19 +46,19 @@ public class SubNegotiationTelnetCommand implements TelnetCode {
    * SubNegotiationTelnetCommand is returned; if not, null is returned.
    */
   public static TelnetCode readFromArrayList(ArrayList<Integer> list) {
-    if (list.size() < 3) return null;
+    if (list.size() < 4) return null;
     // we allow both IAC SB <option> <data> IAC SE and IAC SB <option> <data> SE, because some
     // servers erroneously omit the final IAC in some cases
     // (if this turns out to be a problem, just require it after all)
     if (!list.get(1).equals(SB) || !list.get(list.size()-1).equals(SE)) return null;
 
-    int length = list.size()-3;
+    int length = list.size()-4;
     if (list.get(list.size()-2).equals(IAC)) length--;
     
     int[] data = new int[length];
-    for (int i = 0; i < length; i++) data[i] = list.get(i+2);
+    for (int i = 0; i < length; i++) data[i] = list.get(i+3);
 
-    return new SubNegotiationTelnetCommand(list.get(1), data);
+    return new SubNegotiationTelnetCommand(list.get(2), data);
   }
 
   public String toString() {
