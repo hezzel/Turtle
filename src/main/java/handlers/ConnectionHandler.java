@@ -112,8 +112,13 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
   }
 
   /** Called when the connection has acquired text from the server. */
-  public void connectionReceivedContent(char[] text, int length) {
-    sendMudText(new String(text, 0, length));
+  public void connectionReceivedText(String text) {
+    sendMudText(text);
+  }
+
+  /** Called when the connection has encountered an exception that did not cause a disconnect. */
+  public void connectionErrorOccurred(String explanation) {
+    sendWarning(explanation);
   }
 }
 

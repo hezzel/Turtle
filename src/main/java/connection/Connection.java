@@ -29,7 +29,7 @@ public class Connection extends Thread {
   private String _host;
   private int _port;
   private Socket _socket;
-  private InputStreamReader _reader;
+  private TelnetStream _reader;
   private BufferedWriter _writer;
   private boolean _ended;
   private boolean _locked;
@@ -97,7 +97,7 @@ public class Connection extends Thread {
     try {
       _socket = new Socket();
       _socket.connect(new InetSocketAddress(address, _port), 20000);
-      _reader = new InputStreamReader(_socket.getInputStream(), "UTF-8");
+      _reader = new TelnetStream(_socket.getInputStream());
       _writer = new BufferedWriter(new OutputStreamWriter(_socket.getOutputStream(), "UTF-8"));
     }
     catch (IOException e) {
@@ -138,15 +138,19 @@ public class Connection extends Thread {
   private void receiveMudText() {
     char[] buffer = new char[1000];
     try {
-      int num = _reader.read(buffer, 0, 1000);
-      if (num == -1) {
+      TelnetStream.StreamStatus status =_reader.probeAvailableContent();
+      if (status == TelnetStream.StreamStatus.TEXT) {
+        String content = _reader.readString();
+        _listener.connectionReceivedText(content);
+      }
+      else if (status == TelnetStream.StreamStatus.EOF) {
         _listener.connectionClosed(true);
         _ended = true;
       }
-      else {
-        _listener.connectionReceivedContent(buffer, num);
-      }
-    } catch (IOException e) {}  // typically just a timeout
+    } catch (IOException e) {
+      _listener.connectionErrorOccurred("IO Exception in connection (" + e.getClass() + "): " +
+                                        e.getMessage());
+    }
   }
 
   private void closeConnection() {

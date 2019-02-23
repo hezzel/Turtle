@@ -39,7 +39,10 @@ public interface ConnectionListener {
   /** Used when an IP address is found. */
   public void connectionFoundAddress(String host, String address, int port);
 
-  /** Used when the connection has received content from the server. */
-  public void connectionReceivedContent(char[] text, int length);
+  /** Used when the connection has received text from the server. */
+  public void connectionReceivedText(String text);
+
+  /** Used when an unexpected error occurs that has not necessarily closed the connection. */
+  public void connectionErrorOccurred(String explanation);
 }
 
