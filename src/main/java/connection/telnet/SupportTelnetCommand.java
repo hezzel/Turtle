@@ -43,9 +43,10 @@ public class SupportTelnetCommand implements TelnetCode {
    * SupportTelnetCommand is returned; if not, null is returned.
    */
   public static TelnetCode readFromArrayList(ArrayList<Integer> list) {
-    if (list.size() != 3) return null;
+    if (list.size() < 3) return null;
     int cmd = list.get(1);
     if (cmd != WILL && cmd != WONT && cmd != DO && cmd != DONT) return null;
+    if (list.size() != 3) throw new Error("Telnet scanning not done char by char?");
     return new SupportTelnetCommand(cmd, list.get(2));
   }
 

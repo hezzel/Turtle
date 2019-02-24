@@ -24,6 +24,8 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import turtle.interfaces.immutable.TelnetCode;
+import turtle.connection.telnet.*;
 
 /**
  * A TelnetStream is based on a given InputStream, but separates out all the telnet commands.
@@ -42,24 +44,32 @@ public class TelnetStream {
   private InternalBufferStream _ibs;
   private InputStreamReader _reader;
   private ArrayList<Integer> _partialTelnetCode;
-  private ArrayList<Integer> _availableTelnetCode;
+  private TelnetCode _availableTelnetCode;
   private String _availableText;
   private static final int BUFFERSIZE = 1000;
 
   /**
-   * StreamStatus gives the states that the telnet stream may be in: the may not be ready to be
-   * read (NONE), may have a text string available (TEXT), or a telnet code available (TELNET);
+   * StreamStatus gives the states that the telnet stream may be in: the stream may not be ready to
+   * be read (NONE), may have a text string available (TEXT), or a telnet code available (TELNET);
    * alternatively, the connection may have ended (EOF).
    */
   public enum StreamStatus { NONE, TEXT, TELNET, EOF };
 
   private class OutOfBufferException extends IOException { }
 
+  /**
+   * For internal use only: this buffer stream is used to turn the internally buffered text into a
+   * stream that an InputStreamReader can use to create a char stream.
+   * Doing this rather than simply converting the byte sequence to a string is necessary because
+   * the buffered text is never guaranteed to be complete, so may well end in the middle of a
+   * unicode char; the InputStreamReader can deal with that, and wait with outputting the relevant
+   * char until more of the byte stream is added to the buffer.
+   */
   private class InternalBufferStream extends InputStream {
     public int read() throws IOException {
       if (_textBufferStart >= _textBufferSize) throw new OutOfBufferException();
       int c = _textBuffer[_textBufferStart];
-      if (c < 0) c += 255;
+      if (c < 0) c += 256;
       _textBufferStart++;
       return c;
     }
@@ -121,6 +131,12 @@ public class TelnetStream {
     }
   }
 
+  /**
+   * This method moves text from _connectionBuffer to _textBuffer, until _connectionBuffer runs
+   * out, _textBuffer is full, or an IAC is encountered in _connectionBuffer.
+   * Note that this means that the text is removed from _connectionBuffer (by increasing
+   * _connectionBufferStart).
+   */
   private void moveNonTelnetFromConnectionToTextBuffer() {
     for (; _connectionBufferStart < _connectionBufferSize && _textBufferSize < BUFFERSIZE;
            _connectionBufferStart++, _textBufferSize++) {
@@ -128,9 +144,14 @@ public class TelnetStream {
       if (c == -1) break; // IAC
       _textBuffer[_textBufferSize] = c;
     }
-
   }
 
+  /**
+   * This function parses _textBuffer into a string.
+   * It is possible that _textBuffer does not end at a complete utf-8 codepoint.  In that case, the
+   * string up to the last character is returned, and the incomplete character is left in the
+   * buffer for later completing.
+   */
   private StreamStatus readTextBufferToString() throws IOException {
     char[] charbuffer = new char[BUFFERSIZE];
     int len = _reader.read(charbuffer);
@@ -138,34 +159,6 @@ public class TelnetStream {
     if (len == 0) return StreamStatus.NONE;
     _availableText = new String(charbuffer, 0, len);
     return StreamStatus.TEXT;
-  }
-
-  private boolean telnetCodeIncomplete() {
-    if (_partialTelnetCode.size() <= 1) return true;
-    // now size is at least 2; the only codes of more than 2 bytes start with IAC <X>, where <X>
-    // is SB (250) or one of WILL, WONT, DO, DONT (251..254)
-    if (_partialTelnetCode.get(1) < 250) return false;
-    if (_partialTelnetCode.size() == 2) return true;
-    // now size is at least 3; the codes WILL, WONT, DO, DONT all have this size
-    if (_partialTelnetCode.get(1) != 250) return false;
-    // thus, we have IAC SB; we are done when the last character is SE
-    if (_partialTelnetCode.get(_partialTelnetCode.size()-1) == 240) return false;
-    return true;
-  }
-
-  private StreamStatus readRemainingTelnetCode() {
-    while (telnetCodeIncomplete() && _connectionBufferStart < _connectionBufferSize) {
-      int c = _connectionBuffer[_connectionBufferStart];
-      if (c < 0) c += 256;
-      _partialTelnetCode.add(c);
-      _connectionBufferStart++;
-    }
-    if (telnetCodeIncomplete()) return StreamStatus.NONE;
-    else {
-      _availableTelnetCode = _partialTelnetCode;
-      _partialTelnetCode = new ArrayList<Integer>();
-    }
-    return StreamStatus.TELNET;
   }
 
   /**
@@ -181,6 +174,36 @@ public class TelnetStream {
   }
 
   /**
+   * This function tests whether _partialTelnetCode actually represents a complete telnet code,
+   * and if so, turns it into a TelnetCode class.  If not, null is returned instead.
+   */
+  private TelnetCode tryPartialToCompleteTelnetCode() {
+    TelnetCode ret;
+    ret = SingleTelnetCommand.readFromArrayList(_partialTelnetCode);
+    if (ret == null) ret = SupportTelnetCommand.readFromArrayList(_partialTelnetCode);
+    if (ret == null) ret = SubNegotiationTelnetCommand.readFromArrayList(_partialTelnetCode);
+    return ret;
+  }
+
+  private StreamStatus readRemainingTelnetCode() {
+    // read one character at a time, so we don't accidentally overshoot the telnet code
+    while (_connectionBufferStart < _connectionBufferSize) {
+      int b = _connectionBuffer[_connectionBufferStart];
+      if (b < 0) b += 256;
+      _partialTelnetCode.add(b);
+      _connectionBufferStart++;
+
+      TelnetCode code = tryPartialToCompleteTelnetCode();
+      if (code != null) {
+        _availableTelnetCode = code;
+        _partialTelnetCode.clear();
+        return StreamStatus.TELNET;
+      }
+    }
+    return StreamStatus.NONE;
+  }
+
+  /**
    * This function reads from the source stream and parses the result in strings and telnet codes.
    * The return value tells you what the next thing to be read is.
    * It is allowed to call this function multiple times without reading the available text or
@@ -191,10 +214,7 @@ public class TelnetStream {
     catch (SocketTimeoutException e) { return StreamStatus.NONE; }
     if (_connectionBufferStart >= _connectionBufferSize) return StreamStatus.NONE;
 
-    if (_partialTelnetCode.size() > 0) {
-      return readRemainingTelnetCode();
-    }
-    else if (_connectionBuffer[_connectionBufferStart] == -1) { // IAC
+    if (_partialTelnetCode.size() > 0 || _connectionBuffer[_connectionBufferStart] == -1) {
       return readRemainingTelnetCode();
     }
     else {
@@ -206,10 +226,8 @@ public class TelnetStream {
     return _availableText;
   }
 
-  public ArrayList<Integer> readTelnetCode() {
-    ArrayList<Integer> ret = _availableTelnetCode;
-    _availableTelnetCode = null;
-    return ret;
+  public TelnetCode readTelnetCode() {
+    return _availableTelnetCode;
   }
 }
 

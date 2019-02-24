@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import turtle.interfaces.immutable.TelnetCode;
 import turtle.connection.telnet.*;
 
-public class TelnetTest {
+public class TelnetCommandTest {
   @Test
   public void testSingleTelnetCommandConstruction() {
     // we want to know that _any_ telnet command is recognised as a single command other than those
@@ -45,7 +45,7 @@ public class TelnetTest {
     assertTrue(code == null);
   }
 
-  @Test
+  @Test(expected = java.lang.Error.class)
   public void testSingleTelnetCommandReadFailureTooLong() {
     // read from input
     ArrayList<Integer> list = new ArrayList<Integer>();
@@ -53,7 +53,6 @@ public class TelnetTest {
     list.add(TelnetCode.GA);
     list.add(TelnetCode.SE);
     TelnetCode code = SingleTelnetCommand.readFromArrayList(list);
-    assertTrue(code == null);
   }
 
   @Test
@@ -78,6 +77,7 @@ public class TelnetTest {
     list.add(TelnetCode.DONT);
     list.add(89);
     TelnetCode code = SupportTelnetCommand.readFromArrayList(list);
+    assertTrue(code != null);
   }
 
   @Test
@@ -86,9 +86,10 @@ public class TelnetTest {
     list.add(TelnetCode.IAC);
     list.add(TelnetCode.DO);
     TelnetCode code = SupportTelnetCommand.readFromArrayList(list);
+    assertTrue(code == null);
   }
 
-  @Test
+  @Test(expected = java.lang.Error.class)
   public void SupportTelnetCommandFailureTooLong() {
     ArrayList<Integer> list = new ArrayList<Integer>();
     list.add(TelnetCode.IAC);
@@ -96,6 +97,7 @@ public class TelnetTest {
     list.add(89);
     list.add(98);
     TelnetCode code = SupportTelnetCommand.readFromArrayList(list);
+    assertTrue(code == null);
   }
 
   @Test
@@ -105,6 +107,7 @@ public class TelnetTest {
     list.add(TelnetCode.GA);
     list.add(89);
     TelnetCode code = SupportTelnetCommand.readFromArrayList(list);
+    assertTrue(code == null);
   }
 
   @Test

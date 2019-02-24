@@ -35,9 +35,10 @@ public class SingleTelnetCommand implements TelnetCode {
    * SingleTelnetCommand is returned; if not, null is returned.
    */
   public static TelnetCode readFromArrayList(ArrayList<Integer> list) {
-    if (list.size() != 2) return null;
+    if (list.size() < 2) return null;
     int cmd = list.get(1);
     if (cmd != WILL && cmd != WONT && cmd != DO && cmd != DONT && cmd != SB) {
+      if (list.size() != 2) throw new Error("Telnet scanning not done char by char?");
       return new SingleTelnetCommand(cmd);
     }
     else return null;
