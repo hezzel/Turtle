@@ -31,9 +31,13 @@ import turtle.EventBus;
 
 /** The Telnet Handler listens for telnet events and handles them as appropriate. */
 public class TelnetHandler implements EventListener {
+  private static final int TELOPT_TTYPE = 24;
+  private static final int TELOPT_NAWS = 31;
+  private static final int TELOPT_COMPRESS = 86;
+  private static final int TELOPT_MXP = 91;
+  private static final int TELOPT_ZMP = 93;
   private static final int TELQUAL_IS   =  0;
   private static final int TELQUAL_SEND =  1;
-  private static final int TELOPT_TTYPE = 24;
 
   private TelnetSender _sender;
 
@@ -45,15 +49,45 @@ public class TelnetHandler implements EventListener {
     return kind == TurtleEvent.EventKind.TELNET;
   }
 
+  private String telnetToString(TelnetCode code) {
+    String ret = "IAC ";
+    String[] commands = { "NOP", "DAT", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA",
+                          "SB", "DO", "DONT", "WILL", "WONT" };
+    int cmd = code.queryCommand();
+    if (cmd >= 241 && cmd <= 254) ret += commands[cmd - 241] + " ";
+    else ret += cmd + " ";
+
+    int option = code.queryOption();
+    if (option == TELOPT_TTYPE) ret += "TTYPE ";
+    else if (option == TELOPT_NAWS) ret += "NAWS";
+    else if (option == TELOPT_COMPRESS) ret += "COMPRESS";
+    else if (option == TELOPT_MXP) ret += "MXP";
+    else if (option == TELOPT_ZMP) ret += "ZMP";
+    else if (option != -1) ret += option + " ";
+
+    int[] sub = code.querySubNegotiation();
+    if (sub != null) {
+      int start = 1;
+      if (sub.length != 0) {
+        if (sub[0] == TELQUAL_IS) ret += "IS ";
+        else if (sub[0] == TELQUAL_SEND) ret += "SEND ";
+        else start = 0;
+      }
+      for (int i = start; i < sub.length; i++) ret += sub[i] + " ";
+      ret += "IAC SE";
+    }
+    return ret;
+  }
+
   public void eventOccurred(TurtleEvent event) {
     TelnetEvent evt = (TelnetEvent)event;
     TelnetCode code = evt.queryTelnetCode();
-    EventBus.eventOccurred(new InformationEvent("[Received telnet: " + code.toString() + "]"));
+    EventBus.eventOccurred(new InformationEvent("[Received telnet: "+ telnetToString(code) + "]"));
     int command = code.queryCommand();
     int option = code.queryOption();
     // here handle codes we actually want to do something with
     if (handleSupportedCommand(command, option, code.querySubNegotiation())) return;
-    // remaining codes are not support; inform the server of this
+    // remaining codes are not supported; inform the server of this
     if (command == TelnetCode.WILL) rejectWill(option);
     if (command == TelnetCode.WONT) acceptWont(option);
     if (command == TelnetCode.DO)   rejectDo(option);
@@ -61,7 +95,7 @@ public class TelnetHandler implements EventListener {
 
   private void send(TelnetCode code) {
     _sender.sendTelnet(code);
-    EventBus.eventOccurred(new InformationEvent("[Sent telnet: " + code.toString() + "]"));
+    EventBus.eventOccurred(new InformationEvent("[Sent telnet: " + telnetToString(code) + "]"));
   }
 
   private boolean handleSupportedCommand(int command, int option, int[] subnegotiation) {

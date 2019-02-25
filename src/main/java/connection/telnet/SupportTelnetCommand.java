@@ -50,17 +50,6 @@ public class SupportTelnetCommand implements TelnetCode {
     return new SupportTelnetCommand(cmd, list.get(2));
   }
 
-  public String toString() {
-    String str = "IAC ";
-    if (_command == WILL) str += "WILL ";
-    else if (_command == WONT) str += "WONT ";
-    else if (_command == DO) str += "DO ";
-    else if (_command == DONT) str += "DONT ";
-    else str += "???(" + _command + ") ";
-    str += _option;
-    return str;
-  }
-  
   public int queryCommand() { return _command; }
   public int queryOption() { return _option; }
   public int[] querySubNegotiation() { return null; }

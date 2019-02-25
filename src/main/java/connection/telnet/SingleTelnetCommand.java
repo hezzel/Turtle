@@ -44,19 +44,6 @@ public class SingleTelnetCommand implements TelnetCode {
     else return null;
   }
 
-   public String toString() {
-    if (_command == NOP) return "IAC NOP";
-    else if (_command == DAT) return "IAC DAT";
-    else if (_command == BRK) return "IAC BRK";
-    else if (_command == IP) return "IAC IP";
-    else if (_command == AO) return "IAC AO";
-    else if (_command == AYT) return "IAC AYT";
-    else if (_command == EC) return "IAC EC";
-    else if (_command == EL) return "IAC EL";
-    else if (_command == GA) return "IAC GA";
-    else return "IAC [unknown(" + _command + ")]";
-  }
- 
   public int queryCommand() { return _command; }
   public int queryOption() { return -1; }
   public int[] querySubNegotiation() { return null; }

@@ -61,13 +61,6 @@ public class SubNegotiationTelnetCommand implements TelnetCode {
     return new SubNegotiationTelnetCommand(list.get(2), data);
   }
 
-  public String toString() {
-    String str = "IAC SB " + _option + " ";
-    for (int i = 0; i < _data.length; i++) str += _data[i] + " ";
-    str += "IAC SE";
-    return str;
-  }
-  
   public int queryCommand() { return SB; }
   public int queryOption() { return _option; }
 
