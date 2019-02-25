@@ -19,6 +19,8 @@
 
 package turtle.interfaces;
 
+import turtle.interfaces.immutable.TelnetCode;
+
 /**
  * A ConnectionListener is a class that is interested in a given connection.
  * The listener is responsible for taking care of responding in the right thread.
@@ -41,6 +43,9 @@ public interface ConnectionListener {
 
   /** Used when the connection has received text from the server. */
   public void connectionReceivedText(String text);
+
+  /** Used when the connection has received a telnet code from the server. */
+  public void connectionReceivedTelnet(TelnetCode code);
 
   /** Used when an unexpected error occurs that has not necessarily closed the connection. */
   public void connectionErrorOccurred(String explanation);

@@ -29,4 +29,5 @@ other useful or cool stuff
   character management page
   help functionality
   make the numpad keys work
+  make events optional (for users to enable or disable)
 

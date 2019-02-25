@@ -62,7 +62,7 @@ public class SubNegotiationTelnetCommand implements TelnetCode {
   }
 
   public String toString() {
-    String str = "IAC SB " + _option;
+    String str = "IAC SB " + _option + " ";
     for (int i = 0; i < _data.length; i++) str += _data[i] + " ";
     str += "IAC SE";
     return str;
@@ -76,6 +76,17 @@ public class SubNegotiationTelnetCommand implements TelnetCode {
     // manipulate our data!
     int[] ret = new int[_data.length];
     System.arraycopy(_data, 0, ret, 0, _data.length);
+    return ret;
+  }
+
+  public int[] queryCompleteCode() {
+    int[] ret = new int[_data.length+5];
+    ret[0] = IAC;
+    ret[1] = SB;
+    ret[2] = _option;
+    for (int i = 0; i < _data.length; i++) ret[i+3] = _data[i];
+    ret[ret.length-2] = IAC;
+    ret[ret.length-1] = SE;
     return ret;
   }
 }

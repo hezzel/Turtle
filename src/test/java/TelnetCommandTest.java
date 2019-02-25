@@ -32,7 +32,7 @@ public class TelnetCommandTest {
     // test that it is what we expect
     assertTrue(code != null);
     assertTrue(code.queryCommand() == 29);
-    assertTrue(code.queryOption() == 0);
+    assertTrue(code.queryOption() == -1);
     assertTrue(code.querySubNegotiation() == null);
   }
 
@@ -63,6 +63,15 @@ public class TelnetCommandTest {
     list.add(TelnetCode.WILL);
     TelnetCode code = SingleTelnetCommand.readFromArrayList(list);
     assertTrue(code == null);
+  }
+
+  @Test
+  public void testSingleTelnetCommandComplete() {
+    TelnetCode code = new SingleTelnetCommand(TelnetCode.GA);
+    int[] parts = code.queryCompleteCode();
+    assertTrue(parts.length == 2);
+    assertTrue(parts[0] == TelnetCode.IAC);
+    assertTrue(parts[1] == TelnetCode.GA);
   }
 
   @Test(expected = java.lang.Error.class)
@@ -108,6 +117,16 @@ public class TelnetCommandTest {
     list.add(89);
     TelnetCode code = SupportTelnetCommand.readFromArrayList(list);
     assertTrue(code == null);
+  }
+
+  @Test
+  public void testSupportTelnetCommandComplete() {
+    TelnetCode code = new SupportTelnetCommand(TelnetCode.WILL, 88);
+    int[] parts = code.queryCompleteCode();
+    assertTrue(parts.length == 3);
+    assertTrue(parts[0] == TelnetCode.IAC);
+    assertTrue(parts[1] == TelnetCode.WILL);
+    assertTrue(parts[2] == 88);
   }
 
   @Test
@@ -157,6 +176,23 @@ public class TelnetCommandTest {
     int[] args = code.querySubNegotiation();
     assertTrue(args.length == 4);
     assertTrue(args[3] == 77);
+  }
+
+  @Test
+  public void testSubNegotiationTelnetCommandComplete() {
+    ArrayList<Integer> data = new ArrayList<Integer>();
+    data.add(1);
+    data.add(12);
+    TelnetCode code = new SubNegotiationTelnetCommand(100, data);
+    int[] parts = code.queryCompleteCode();
+    assertTrue(parts.length == 7);
+    assertTrue(parts[0] == TelnetCode.IAC);
+    assertTrue(parts[1] == TelnetCode.SB);
+    assertTrue(parts[2] == 100);
+    assertTrue(parts[3] == 1);
+    assertTrue(parts[4] == 12);
+    assertTrue(parts[5] == TelnetCode.IAC);
+    assertTrue(parts[6] == TelnetCode.SE);
   }
 }
 

@@ -58,7 +58,11 @@ public class SingleTelnetCommand implements TelnetCode {
   }
  
   public int queryCommand() { return _command; }
-  public int queryOption() { return 0; }
+  public int queryOption() { return -1; }
   public int[] querySubNegotiation() { return null; }
+
+  public int[] queryCompleteCode() {
+    return new int[] { IAC, _command };
+  }
 }
 

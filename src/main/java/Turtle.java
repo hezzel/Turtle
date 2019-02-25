@@ -30,6 +30,8 @@ public class Turtle {
     EventBus.registerEventListener(infh);
     ConnectionHandler conh = new ConnectionHandler();
     EventBus.registerEventListener(conh);
+    TelnetHandler telh = new TelnetHandler(conh);
+    EventBus.registerEventListener(telh);
     // temporary: move this to a menu or command once that's implemented
     conh.createConnection("discworld.starturtle.net", 4242);
   }

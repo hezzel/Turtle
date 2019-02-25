@@ -23,7 +23,9 @@ import java.awt.EventQueue;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.ConnectionListener;
+import turtle.interfaces.TelnetSender;
 
 public class Connection extends Thread {
   private String _host;
@@ -31,10 +33,12 @@ public class Connection extends Thread {
   private Socket _socket;
   private TelnetStream _reader;
   private BufferedWriter _writer;
+  private BufferedOutputStream _telnetWriter;
   private boolean _ended;
   private boolean _locked;
   private boolean _userClose;
-  private ArrayList<String> _queued;
+  private ArrayList<String> _queuedText;
+  private ArrayList<TelnetCode> _queuedTelnet;
   private ConnectionListener _listener;
 
   /** Default constructor; sets up the class and immediately opens the connection. */
@@ -45,7 +49,8 @@ public class Connection extends Thread {
     _ended = false;
     _locked = false;
     _userClose = false;
-    _queued = new ArrayList<String>();
+    _queuedText = new ArrayList<String>();
+    _queuedTelnet = new ArrayList<TelnetCode>();
     _listener = listener;
     start();
   }
@@ -58,6 +63,7 @@ public class Connection extends Thread {
   public void run() {
     _writer = null;
     _reader = null;
+    _telnetWriter = null;
 
     verifyConnectionData();
     if (!_ended) createConnection();
@@ -68,6 +74,10 @@ public class Connection extends Thread {
     closeConnection();
   }
 
+  /**
+   * Tests whether host and port are good enough to even _try_ connection, and aborts the
+   * connection attempt (with a call to _listener.connectionFailed) otherwise.
+   */
   private void verifyConnectionData() {
     if (_host == null || _host.equals("")) {
       _listener.connectionFailed("Asked to connect to an empty host.");
@@ -81,6 +91,10 @@ public class Connection extends Thread {
     }
   }
 
+  /**
+   * Find the IP address. Note that this does a call to the IP server, so may block for a longer
+   * time, or fail if the connection is unreliable or the host cannot be found.
+   */
   private InetAddress lookupAddress() {
     InetAddress address;
     try { address = InetAddress.getByName(_host); }
@@ -93,12 +107,24 @@ public class Connection extends Thread {
     return address;
   }
 
+  /**
+   * This opens a connection to the given IP address by creating the relevant socket, making it
+   * connect, setting up a reasonable timeout and passing it to a TelnetStream that will be
+   * responsible for reading, and a BufferedWriter to do the writing.
+   */
   private void connectToAddress(InetAddress address) {
     try {
       _socket = new Socket();
       _socket.connect(new InetSocketAddress(address, _port), 20000);
+      try { _socket.setSoTimeout(250); }
+      catch (SocketException e) {
+        _listener.connectionFailed("Could not set socket timeout: " + e.getMessage());
+        _ended = true;
+        return;
+      }
       _reader = new TelnetStream(_socket.getInputStream());
       _writer = new BufferedWriter(new OutputStreamWriter(_socket.getOutputStream(), "UTF-8"));
+      _telnetWriter = new BufferedOutputStream(_socket.getOutputStream());
     }
     catch (IOException e) {
       _listener.connectionFailed("Could not connect to IP: " + e.getMessage());
@@ -107,31 +133,37 @@ public class Connection extends Thread {
     if (!_ended)_listener.connectionEstablished(_host, address.toString(), _port);
   }
 
-  private void setSocketTimeout() {
-    try { _socket.setSoTimeout(250); }
-    catch (SocketException e) {
-      _listener.connectionFailed("Could not set socket timeout: " + e.getMessage());
-      _ended = true;
-    }
-  }
-
   private void createConnection() {
     InetAddress address = lookupAddress();
     if (!_ended) connectToAddress(address);
-    if (!_ended) setSocketTimeout();
   }
   
   private void sendQueuedCommands() {
     lock();
     try {
-      for (int i = 0; i < _queued.size(); i++) {
-        String text = _queued.get(i);
+      for (int i = 0; i < _queuedText.size(); i++) {
+        String text = _queuedText.get(i);
         _writer.write(text + "\n", 0, text.length() + 1); 
       }
-      if (_queued.size() > 0) _writer.flush();
+      if (_queuedText.size() > 0) _writer.flush();
     }   
     catch (IOException e) { } 
-    _queued.clear();
+    _queuedText.clear();
+    unlock();
+  }
+
+  private void sendQueuedTelnet() {
+    lock();
+    try {
+      for (int i = 0; i < _queuedTelnet.size(); i++) {
+        TelnetCode code = _queuedTelnet.get(i);
+        int[] parts = code.queryCompleteCode();
+        for (int j = 0; j < parts.length; j++) _writer.write(parts[j]);
+      }
+      if (_queuedTelnet.size() > 0) _telnetWriter.flush();
+    }   
+    catch (IOException e) { } 
+    _queuedTelnet.clear();
     unlock();
   }
 
@@ -142,6 +174,10 @@ public class Connection extends Thread {
       if (status == TelnetStream.StreamStatus.TEXT) {
         String content = _reader.readString();
         _listener.connectionReceivedText(content);
+      }
+      if (status == TelnetStream.StreamStatus.TELNET) {
+        TelnetCode code = _reader.readTelnetCode();
+        _listener.connectionReceivedTelnet(code);
       }
       else if (status == TelnetStream.StreamStatus.EOF) {
         _listener.connectionClosed(true);
@@ -182,13 +218,26 @@ public class Connection extends Thread {
   }
 
   /**
-   * Call this from other thread to send the given text over the current connection.  If the
+   * Call this from any other thread to send the given text over the current connection.  If the
    * connection is not open yet, it will be sent once the connection is established (or never, if
    * that doesn't happen).
    */
   public void send(String text) {
     lock();
-    _queued.add(text);
+    _queuedText.add(text);
+    unlock();
+  }
+
+  /**
+   * Call this from any other thread to send the given telnet code over the current connection.  If
+   * the connection is not open yet, it will be sent once the connection is established (or never,
+   * if that doesn't happen).
+   * Note that if telnet commands and text commands are passed to Connection interleaved, they are
+   * not necessarily sent in over the connection in that same order.
+   */
+  public void sendTelnet(TelnetCode code) {
+    lock();
+    _queuedTelnet.add(code);
     unlock();
   }
 

@@ -20,12 +20,15 @@
 package turtle.handlers;
 
 import java.awt.EventQueue;
+import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.ConnectionListener;
+import turtle.interfaces.TelnetSender;
 import turtle.EventBus;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
+import turtle.events.TelnetEvent;
 import turtle.events.UserCommandEvent;
 import turtle.events.WarningEvent;
 import turtle.connection.Connection;
@@ -34,7 +37,7 @@ import turtle.connection.Connection;
  * The Connection Handler manages connections to a remote server.
  * This is all done asynchronously, but the rest of the program does not need to consider that.
  */
-public class ConnectionHandler implements EventListener, ConnectionListener {
+public class ConnectionHandler implements EventListener, ConnectionListener, TelnetSender {
   Connection _connection;
 
   public ConnectionHandler() {
@@ -48,6 +51,12 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
     else {
       String warning = "Cannot create a new connection when you are already connected.";
       EventBus.eventOccurred(new WarningEvent(warning));
+    }
+  }
+
+  public void sendTelnet(TelnetCode code) {
+    if (_connection != null) {
+      _connection.sendTelnet(code);
     }
   }
 
@@ -84,11 +93,6 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
     sendEventOnQueue(new WarningEvent(txt));
   }
 
-  /** Sends a "mud text arrived" event with the given text. */
-  private void sendMudText(String txt) {
-    sendEventOnQueue(new MudTextEvent(txt));
-  }
-
   /** Called when connecting failed or the connection is broken improperly. */
   public void connectionFailed(String error) {
     if (_connection != null) sendWarning("Connection closed: " + error);
@@ -111,9 +115,20 @@ public class ConnectionHandler implements EventListener, ConnectionListener {
     sendInformation("Connection established.");
   }
 
-  /** Called when the connection has acquired text from the server. */
+  /**
+   * Called when the connection has acquired text from the server;
+   * sends a "mud text arrived" event with the given text.
+   */
   public void connectionReceivedText(String text) {
-    sendMudText(text);
+    sendEventOnQueue(new MudTextEvent(text));
+  }
+
+  /**
+   * Called when the connection has encountered an exception that did not cause a disconnect;
+   * sends out a "telnet code arrived" event with the given code.
+   */
+  public void connectionReceivedTelnet(TelnetCode code) {
+    sendEventOnQueue(new TelnetEvent(code));
   }
 
   /** Called when the connection has encountered an exception that did not cause a disconnect. */

@@ -64,5 +64,9 @@ public class SupportTelnetCommand implements TelnetCode {
   public int queryCommand() { return _command; }
   public int queryOption() { return _option; }
   public int[] querySubNegotiation() { return null; }
+
+  public int[] queryCompleteCode() {
+    return new int[] { TelnetCode.IAC, _command, _option };
+  }
 }
 

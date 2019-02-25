@@ -51,7 +51,7 @@ public interface TelnetCode {
   /**
    * For a command IAC <X> <O>, where X is one of WILL, WONT, DO, DONT, this returns O.
    * For a command IAC SB <O> [...] SE, this also returns O.
-   * For all other commands, it returns 0.
+   * For all other commands, it returns -1.
    */
   public int queryOption();
 
@@ -60,5 +60,7 @@ public interface TelnetCode {
    * For all other commands, null is returned.
    */
   public int[] querySubNegotiation();
+
+  public int[] queryCompleteCode();
 }
 
