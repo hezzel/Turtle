@@ -40,9 +40,11 @@ public class TelnetHandler implements EventListener {
   private static final int TELQUAL_SEND =  1;
 
   private TelnetSender _sender;
+  private String _lastTtype;
 
   public TelnetHandler(TelnetSender sender) {
     _sender = sender;
+    _lastTtype = null;
   }
 
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
@@ -103,17 +105,37 @@ public class TelnetHandler implements EventListener {
     return false;
   }
 
+  /**
+   * Following the standards, we should send our supported terminal types in order of preference,
+   * until the server stops asking; however, if they keep asking and we're through, we should
+   * repeat the last one.
+   * If they keep asking even after that, we'll just restart the loop.
+   */
+  private void sendTTypeRequest() {
+    String sendNow;
+
+    if (_lastTtype == null) sendNow = "xterm16m";
+    else if (_lastTtype.equals("xterm16m")) sendNow = "xterm256m";
+    else sendNow = "ansi";
+
+    if (_lastTtype == null || !_lastTtype.equals(sendNow)) _lastTtype = sendNow;
+    else _lastTtype = null;
+
+    byte[] parts = sendNow.getBytes();
+    ArrayList<Integer> arr = new ArrayList<Integer>();
+    arr.add(TELQUAL_IS);
+    for (int i = 0; i < parts.length; i++) arr.add(parts[i] < 0 ? parts[i] + 256 : parts[i]);
+    send(new SubNegotiationTelnetCommand(TELOPT_TTYPE, arr));
+  }
+
   private boolean handleTType(int command, int[] subn) {
     if (command == TelnetCode.DO) {
       send(new SupportTelnetCommand(TelnetCode.WILL, TELOPT_TTYPE));
       return true;
     }
     if (command == TelnetCode.SB && subn.length == 1 && subn[0] == TELQUAL_SEND) {
-      byte[] parts = (new String("dumb")).getBytes();
-      ArrayList<Integer> arr = new ArrayList<Integer>();
-      arr.add(TELQUAL_IS);
-      for (int i = 0; i < parts.length; i++) arr.add(parts[i] < 0 ? parts[i] + 256 : parts[i]);
-      send(new SubNegotiationTelnetCommand(TELOPT_TTYPE, arr));
+      sendTTypeRequest();
+      return true;
     }
     return false;
   }

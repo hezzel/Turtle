@@ -69,6 +69,7 @@ public class Connection extends Thread {
     if (!_ended) createConnection();
     while (!_ended) {
       sendQueuedCommands();
+      sendQueuedTelnet();
       receiveMudText();
     }
     closeConnection();
@@ -158,7 +159,7 @@ public class Connection extends Thread {
       for (int i = 0; i < _queuedTelnet.size(); i++) {
         TelnetCode code = _queuedTelnet.get(i);
         int[] parts = code.queryCompleteCode();
-        for (int j = 0; j < parts.length; j++) _writer.write(parts[j]);
+        for (int j = 0; j < parts.length; j++) _telnetWriter.write(parts[j]);
       }
       if (_queuedTelnet.size() > 0) _telnetWriter.flush();
     }   
