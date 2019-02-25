@@ -1,24 +1,32 @@
-[x] working client
-[x] working network connection (to Discworld)
-telnet negotiation
-support for ansi, xterm256, xterm16m
-clever input window
-scrolling
-commands
-aliases
-timers
-triggers
-macros
-zmp
-automapper
-tab completion
-creator features
-clever windowing system
-mxp
-categories
-character management page
-help functionality
-logfiles
-make the numpad keys work
-mccp (compression)
+basics
+  [x] working client
+  [x] working network connection (to Discworld)
+  telnet negotiation
+  support for ansi, xterm256, xterm16m
+  scrolling
+  command parsing
+cool featres
+  logfiles
+  aliases
+  timers
+  triggers
+  macros
+  categories
+windowing
+  clever input window
+  changing colour schemes
+  clever windowing system
+better telnet and connection
+  support for reconnecting (telnet handler should reset, especially the ansi stuff)
+  make telnet handler keep track of what it already said recently was supported (to avoid doubling up)
+  mccp (compression)
+  zmp
+other useful or cool stuff
+  automapper
+  tab completion
+  creator features
+  mxp
+  character management page
+  help functionality
+  make the numpad keys work
 
