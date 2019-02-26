@@ -28,12 +28,12 @@ import turtle.interfaces.immutable.TelnetCode;
 import turtle.connection.telnet.*;
 
 /**
- * A TelnetStream is based on a given InputStream, but separates out all the telnet commands.
+ * A TelnetInputStream is based on a given InputStream, but separates out all the telnet commands.
  * Care is taken to give the results in order, so that even if the server sends a telnet command
  * halfway through a line, this will lead to three events: first a text arriving event for the
  * first half, then a telnet event, then a text event for the last half.
  */
-public class TelnetStream {
+public class TelnetInputStream {
   private InputStream _source;
   private byte[] _textBuffer;
   private byte[] _connectionBuffer;
@@ -75,7 +75,7 @@ public class TelnetStream {
     }
   }
 
-  public TelnetStream(InputStream source) throws IOException {
+  public TelnetInputStream(InputStream source) throws IOException {
     _source = source;
     _textBufferSize = 0;
     _textBufferStart = 0;
@@ -228,6 +228,11 @@ public class TelnetStream {
 
   public TelnetCode readTelnetCode() {
     return _availableTelnetCode;
+  }
+
+  public void close() throws IOException {
+    _source.close();
+    _reader.close();
   }
 }
 

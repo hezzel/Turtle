@@ -1,11 +1,11 @@
 basics
   [x] working client
   [x] working network connection (to Discworld)
-  telnet negotiation
+  [/] telnet negotiation (TODO: unit testing for the telnet handler; in particular TType negotiation, and separate a TelnetOutputStream)
   support for ansi, xterm256, xterm16m
   scrolling
   command parsing
-cool featres
+cool features
   logfiles
   aliases
   timers
@@ -29,5 +29,5 @@ other useful or cool stuff
   character management page
   help functionality
   make the numpad keys work
-  make events optional (for users to enable or disable)
+  make various kinds of information events optional (for users to enable or disable)
 

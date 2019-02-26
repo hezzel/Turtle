@@ -27,13 +27,19 @@ import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.ConnectionListener;
 import turtle.interfaces.TelnetSender;
 
+/**
+ * A Connection represents a telnet connection to a given server, which receives and sends both
+ * normal text and telnet codes.
+ * The Connection class runs in a separate thread, but takes full responsibility for organising
+ * deadlock-freeness.  Received data is passed to a given ConnectionListener; sent data is passed
+ * over the socket connection when the thread is given focus.
+ */
 public class Connection extends Thread {
   private String _host;
   private int _port;
   private Socket _socket;
-  private TelnetStream _reader;
-  private BufferedWriter _writer;
-  private BufferedOutputStream _telnetWriter;
+  private TelnetInputStream _reader;
+  private TelnetOutputStream _writer;
   private boolean _ended;
   private boolean _locked;
   private boolean _userClose;
@@ -61,9 +67,8 @@ public class Connection extends Thread {
    * Do not call manually! It is public only because it needs to be for the threading code.
    */
   public void run() {
-    _writer = null;
     _reader = null;
-    _telnetWriter = null;
+    _writer = null;
 
     verifyConnectionData();
     if (!_ended) createConnection();
@@ -110,7 +115,7 @@ public class Connection extends Thread {
 
   /**
    * This opens a connection to the given IP address by creating the relevant socket, making it
-   * connect, setting up a reasonable timeout and passing it to a TelnetStream that will be
+   * connect, setting up a reasonable timeout and passing it to a TelnetInputStream that will be
    * responsible for reading, and a BufferedWriter to do the writing.
    */
   private void connectToAddress(InetAddress address) {
@@ -123,9 +128,8 @@ public class Connection extends Thread {
         _ended = true;
         return;
       }
-      _reader = new TelnetStream(_socket.getInputStream());
-      _writer = new BufferedWriter(new OutputStreamWriter(_socket.getOutputStream(), "UTF-8"));
-      _telnetWriter = new BufferedOutputStream(_socket.getOutputStream());
+      _reader = new TelnetInputStream(_socket.getInputStream());
+      _writer = new TelnetOutputStream(_socket.getOutputStream());
     }
     catch (IOException e) {
       _listener.connectionFailed("Could not connect to IP: " + e.getMessage());
@@ -141,13 +145,7 @@ public class Connection extends Thread {
   
   private void sendQueuedCommands() {
     lock();
-    try {
-      for (int i = 0; i < _queuedText.size(); i++) {
-        String text = _queuedText.get(i);
-        _writer.write(text + "\n", 0, text.length() + 1); 
-      }
-      if (_queuedText.size() > 0) _writer.flush();
-    }   
+    try { _writer.sendCommands(_queuedText); }   
     catch (IOException e) { } 
     _queuedText.clear();
     unlock();
@@ -155,14 +153,7 @@ public class Connection extends Thread {
 
   private void sendQueuedTelnet() {
     lock();
-    try {
-      for (int i = 0; i < _queuedTelnet.size(); i++) {
-        TelnetCode code = _queuedTelnet.get(i);
-        int[] parts = code.queryCompleteCode();
-        for (int j = 0; j < parts.length; j++) _telnetWriter.write(parts[j]);
-      }
-      if (_queuedTelnet.size() > 0) _telnetWriter.flush();
-    }   
+    try { _writer.sendTelnetCodes(_queuedTelnet); }
     catch (IOException e) { } 
     _queuedTelnet.clear();
     unlock();
@@ -171,16 +162,16 @@ public class Connection extends Thread {
   private void receiveMudText() {
     char[] buffer = new char[1000];
     try {
-      TelnetStream.StreamStatus status =_reader.probeAvailableContent();
-      if (status == TelnetStream.StreamStatus.TEXT) {
+      TelnetInputStream.StreamStatus status =_reader.probeAvailableContent();
+      if (status == TelnetInputStream.StreamStatus.TEXT) {
         String content = _reader.readString();
         _listener.connectionReceivedText(content);
       }
-      if (status == TelnetStream.StreamStatus.TELNET) {
+      if (status == TelnetInputStream.StreamStatus.TELNET) {
         TelnetCode code = _reader.readTelnetCode();
         _listener.connectionReceivedTelnet(code);
       }
-      else if (status == TelnetStream.StreamStatus.EOF) {
+      else if (status == TelnetInputStream.StreamStatus.EOF) {
         _listener.connectionClosed(true);
         _ended = true;
       }
@@ -192,6 +183,7 @@ public class Connection extends Thread {
 
   private void closeConnection() {
     try {
+      if (_reader != null) { _reader.close(); _writer = null; }
       if (_writer != null) { _writer.close(); _writer = null; }
       if (_socket != null) { _socket.close(); _socket = null; }
     }

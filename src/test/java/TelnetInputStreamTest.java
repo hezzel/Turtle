@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import turtle.interfaces.immutable.TelnetCode;
-import turtle.connection.TelnetStream;
+import turtle.connection.TelnetInputStream;
 
-public class TelnetStreamTest {
+public class TelnetInputStreamTest {
   private class VariableStream extends InputStream {
     private byte[] bytes;
     private int counter;
@@ -30,45 +30,45 @@ public class TelnetStreamTest {
   }
 
   @Test
-  public void testTelnetStreamBasicText() throws IOException {
+  public void testTelnetInputStreamBasicText() throws IOException {
     VariableStream vstream = new VariableStream();
     vstream.bytes = "Hello world!".getBytes(Charset.forName("UTF-8"));
     vstream.counter = 0;
-    TelnetStream tstream = new TelnetStream(vstream);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    TelnetInputStream tstream = new TelnetInputStream(vstream);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("Hello world!"));
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.NONE);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.NONE);
     assertTrue(tstream.readString().equals("Hello world!"));
     vstream.bytes = "∀x ∈ Φ [x ≠ 3]".getBytes(Charset.forName("UTF-8"));
     vstream.counter = 0;
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("∀x ∈ Φ [x ≠ 3]"));
   }
 
   @Test
-  public void testTelnetStreamPartialUTF() throws IOException {
+  public void testTelnetInputStreamPartialUTF() throws IOException {
     // first the stream will receive two complete characters, and part of a third
     VariableStream vstream = new VariableStream();
     byte[] vbytes = "é∃∀".getBytes(Charset.forName("UTF-8"));
     vstream.bytes = new byte[vbytes.length-1];
     for (int i = 0; i < vstream.bytes.length; i++) vstream.bytes[i] = vbytes[i];
     vstream.counter = 0;
-    TelnetStream tstream = new TelnetStream(vstream);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    TelnetInputStream tstream = new TelnetInputStream(vstream);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("é∃"));
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.NONE);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.NONE);
     // now it receives the remainder and three further characters
     byte[] wbytes = "∅ λ".getBytes(Charset.forName("UTF-8"));
     vstream.bytes = new byte[wbytes.length+1];
     vstream.bytes[0] = vbytes[vbytes.length-1];
     vstream.counter = 0;
     for (int i = 0; i < wbytes.length; i++) vstream.bytes[i+1] = wbytes[i];
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("∀∅ λ"));
   }
 
   @Test
-  public void testTelnetStreamTelnetCode() throws IOException {
+  public void testTelnetInputStreamTelnetCode() throws IOException {
     VariableStream vstream = new VariableStream();
     vstream.bytes = new byte[9];
     vstream.bytes[0] = (byte)TelnetCode.IAC;
@@ -81,12 +81,12 @@ public class TelnetStreamTest {
     vstream.bytes[7] = (byte)TelnetCode.IAC;
     vstream.bytes[8] = (byte)TelnetCode.SE;
     vstream.counter = 0;
-    TelnetStream tstream = new TelnetStream(vstream);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TELNET);
+    TelnetInputStream tstream = new TelnetInputStream(vstream);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TELNET);
     TelnetCode code = tstream.readTelnetCode();
     assertTrue(code.queryCommand() == TelnetCode.WILL);
     assertTrue(code.queryOption() == 87);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TELNET);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TELNET);
     code = tstream.readTelnetCode();
     assertTrue(code.queryCommand() == TelnetCode.SB);
     assertTrue(code.queryOption() == 87);
@@ -104,15 +104,15 @@ public class TelnetStreamTest {
     vstream.bytes[1] = (byte)TelnetCode.SB;
     vstream.bytes[2] = 87;
     vstream.counter = 0;
-    TelnetStream tstream = new TelnetStream(vstream);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.NONE);
+    TelnetInputStream tstream = new TelnetInputStream(vstream);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.NONE);
     vstream.bytes = new byte[4];
     vstream.bytes[0] = 100;
     vstream.bytes[1] = (byte)TelnetCode.IAC;
     vstream.bytes[2] = (byte)TelnetCode.SE;
     vstream.bytes[3] = 98;
     vstream.counter = 0;
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TELNET);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TELNET);
     TelnetCode code = tstream.readTelnetCode();
     assertTrue(code.queryCommand() == TelnetCode.SB);
     assertTrue(code.queryOption() == 87);
@@ -137,12 +137,12 @@ public class TelnetStreamTest {
     for (int i = 0; i < bbytes.length; i++) vstream.bytes[v++] = bbytes[i];
     vstream.counter = 0;
 
-    TelnetStream tstream = new TelnetStream(vstream);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    TelnetInputStream tstream = new TelnetInputStream(vstream);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("é∃"));
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TELNET);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TELNET);
     assertTrue(tstream.readTelnetCode().queryCommand() == TelnetCode.WILL);
-    assertTrue(tstream.probeAvailableContent() == TelnetStream.StreamStatus.TEXT);
+    assertTrue(tstream.probeAvailableContent() == TelnetInputStream.StreamStatus.TEXT);
     assertTrue(tstream.readString().equals("∀∅ λ"));
   }
 }
