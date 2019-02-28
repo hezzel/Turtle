@@ -19,6 +19,7 @@
 
 package turtle.handlers;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.immutable.TurtleEvent;
@@ -51,36 +52,6 @@ public class TelnetHandler implements EventListener {
     return kind == TurtleEvent.EventKind.TELNET;
   }
 
-  private String telnetToString(TelnetCode code) {
-    String ret = "IAC ";
-    String[] commands = { "NOP", "DAT", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA",
-                          "SB", "DO", "DONT", "WILL", "WONT" };
-    int cmd = code.queryCommand();
-    if (cmd >= 241 && cmd <= 254) ret += commands[cmd - 241] + " ";
-    else ret += cmd + " ";
-
-    int option = code.queryOption();
-    if (option == TELOPT_TTYPE) ret += "TTYPE ";
-    else if (option == TELOPT_NAWS) ret += "NAWS";
-    else if (option == TELOPT_COMPRESS) ret += "COMPRESS";
-    else if (option == TELOPT_MXP) ret += "MXP";
-    else if (option == TELOPT_ZMP) ret += "ZMP";
-    else if (option != -1) ret += option + " ";
-
-    int[] sub = code.querySubNegotiation();
-    if (sub != null) {
-      int start = 1;
-      if (sub.length != 0) {
-        if (sub[0] == TELQUAL_IS) ret += "IS ";
-        else if (sub[0] == TELQUAL_SEND) ret += "SEND ";
-        else start = 0;
-      }
-      for (int i = start; i < sub.length; i++) ret += sub[i] + " ";
-      ret += "IAC SE";
-    }
-    return ret;
-  }
-
   public void eventOccurred(TurtleEvent event) {
     TelnetEvent evt = (TelnetEvent)event;
     TelnetCode code = evt.queryTelnetCode();
@@ -93,6 +64,89 @@ public class TelnetHandler implements EventListener {
     if (command == TelnetCode.WILL) rejectWill(option);
     if (command == TelnetCode.WONT) acceptWont(option);
     if (command == TelnetCode.DO)   rejectDo(option);
+  }
+
+  /**
+   * Helper function for telnetCodeToString:
+   * Returns a string representation of the given telnet command.
+   */
+  private String commandToString(int cmd) {
+    String[] commands = { "NOP", "DAT", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA",
+                          "SB", "WILL", "WONT", "DO", "DONT" };
+    if (cmd >= 241 && cmd <= 254) return commands[cmd - 241];
+    else return "" + cmd;
+  }
+
+  /**
+   * Helper function for telnetCodeToString:
+   * Returns a string representation of the given telnet option.
+   */
+  private String optionToString(int option) {
+    if (option == TELOPT_TTYPE) return "TTYPE";
+    if (option == TELOPT_NAWS) return "NAWS";
+    if (option == TELOPT_COMPRESS) return "COMPRESS";
+    if (option == TELOPT_MXP) return "MXP";
+    if (option == TELOPT_ZMP) return "ZMP";
+    return "" + option;
+  }
+
+  /**
+   * Helper function for telnetCodeToString:
+   * Reads the given (partial) integer array as though it is a 0-separated list of strings, each
+   * presented as a byte array that defines a UTF-8 string.
+   */
+  private ArrayList<String> makeStrings(int[] code, int start, int end) {
+    ArrayList<String> ret = new ArrayList<String>();
+    for (int p = start; p < end; p++) {
+      if (code[p] == 0) continue;
+      int q = p;
+      while (q < end && code[q] != 0) q++;
+      byte[] bs = new byte[q-p];
+      for (int i = 0; i < bs.length; i++) bs[i] = (byte)code[p+i];
+      ret.add(new String(bs, StandardCharsets.UTF_8));
+      p = q;
+    }
+    return ret;
+  }
+
+  /**
+   * Helper function for telnetCodeToString:
+   * Translates *just* the subnegotiation part to a string, and ends with a space.
+   */
+  private String subNegotiationToString(int option, int[] subn) {
+    if (subn.length == 0) return " ";
+
+    int start = 1;
+    String ret = "";
+    if (subn[0] == TELQUAL_IS) ret += "IS ";
+    else if (subn[0] == TELQUAL_SEND) ret += "SEND ";
+    else start = 0;
+
+    if ((option == TELOPT_TTYPE || option == TELOPT_ZMP) && subn[0] == TELQUAL_IS) {
+      ArrayList<String> values = makeStrings(subn, 1, subn.length);
+      for (int i = 0; i < values.size(); i++) {
+        ret += "\"" + values.get(i) + "\" ";
+      }
+    }
+    else {
+      for (int i = start; i < subn.length; i++) ret += subn[i] + " ";
+    }
+
+    return ret;
+  }
+
+  /**
+   * Returns a String representation of the given telnet code.
+   * This tries to pretty-print, taking into account all information known by the handler about
+   * specific kinds of telnet commands.
+   */
+  public String telnetToString(TelnetCode code) {
+    String ret = "IAC " + commandToString(code.queryCommand());
+    int option = code.queryOption();
+    if (option != -1) ret += " " + optionToString(option);
+    int[] subn = code.querySubNegotiation();
+    if (subn != null) ret += " " + subNegotiationToString(option, subn) + "IAC SE";
+    return ret;
   }
 
   private void send(TelnetCode code) {
