@@ -87,5 +87,46 @@ public class TelnetHandlerTest {
     TelnetCode code6 = new SubNegotiationTelnetCommand(93, subn);
     assertTrue(_handler.telnetToString(code6).equals("IAC SB ZMP IS \"abc\" \"xy\" IAC SE"));
   }
+
+  @Test
+  public void testTTypeSupported() {
+    TelnetCode code = new SupportTelnetCommand(TelnetCode.DO, 24);
+    _handler.eventOccurred(new TelnetEvent(code));
+    TelnetCode result = _sender.queryLast();
+    assertTrue(result.queryCommand() == TelnetCode.WILL);
+    assertTrue(result.queryOption() == 24);
+  }
+
+  @Test
+  public void testTTypeLoop() {
+    ArrayList<Integer> arr = new ArrayList<Integer>();
+    arr.add(1);
+    TelnetCode request = new SubNegotiationTelnetCommand(24, arr);
+    String resultRepresentation;
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"ansi\" IAC SE"));
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"ansi\" IAC SE"));
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
+
+    _handler.eventOccurred(new TelnetEvent(request));
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
+  }
 }
 

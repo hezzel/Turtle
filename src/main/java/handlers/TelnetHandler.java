@@ -154,9 +154,30 @@ public class TelnetHandler implements EventListener {
     EventBus.eventOccurred(new InformationEvent("[Sent telnet: " + telnetToString(code) + "]"));
   }
 
+  private void rejectWill(int option) {
+    send(new SupportTelnetCommand(TelnetCode.DONT, option));
+  }
+
+  private void acceptWont(int option) {
+    send(new SupportTelnetCommand(TelnetCode.DONT, option));
+  }
+
+  private void rejectDo(int option) {
+    send(new SupportTelnetCommand(TelnetCode.WONT, option));
+  }
+
   private boolean handleSupportedCommand(int command, int option, int[] subnegotiation) {
     if (option == TELOPT_TTYPE) return handleTType(command, subnegotiation);
     return false;
+  }
+
+  /**
+   * This function translates the given list to the sequence of integers that represents it, and
+   * appends this sequence to arr.
+   */
+  private void addStringToIntList(String str, ArrayList<Integer> arr) {
+    byte[] parts = str.getBytes();
+    for (int i = 0; i < parts.length; i++) arr.add(parts[i] < 0 ? parts[i] + 256 : parts[i]);
   }
 
   /**
@@ -169,16 +190,15 @@ public class TelnetHandler implements EventListener {
     String sendNow;
 
     if (_lastTtype == null) sendNow = "xterm16m";
-    else if (_lastTtype.equals("xterm16m")) sendNow = "xterm256m";
+    else if (_lastTtype.equals("xterm16m")) sendNow = "xterm256";
     else sendNow = "ansi";
 
     if (_lastTtype == null || !_lastTtype.equals(sendNow)) _lastTtype = sendNow;
     else _lastTtype = null;
 
-    byte[] parts = sendNow.getBytes();
     ArrayList<Integer> arr = new ArrayList<Integer>();
     arr.add(TELQUAL_IS);
-    for (int i = 0; i < parts.length; i++) arr.add(parts[i] < 0 ? parts[i] + 256 : parts[i]);
+    addStringToIntList(sendNow, arr);
     send(new SubNegotiationTelnetCommand(TELOPT_TTYPE, arr));
   }
 
@@ -192,18 +212,6 @@ public class TelnetHandler implements EventListener {
       return true;
     }
     return false;
-  }
-
-  private void rejectWill(int option) {
-    send(new SupportTelnetCommand(TelnetCode.DONT, option));
-  }
-
-  private void acceptWont(int option) {
-    send(new SupportTelnetCommand(TelnetCode.DONT, option));
-  }
-
-  private void rejectDo(int option) {
-    send(new SupportTelnetCommand(TelnetCode.WONT, option));
   }
 }
 
