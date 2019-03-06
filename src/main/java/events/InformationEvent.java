@@ -26,15 +26,29 @@ import turtle.interfaces.immutable.TurtleEvent;
  * the user.
  */
 public class InformationEvent implements TurtleEvent {
+  public enum InformationKind { FEEDBACK, TELNET };
   private String _text;
+  private InformationKind _kind;
 
+  /** Creates an InformationEvent with kind "FEEDBACK". */
   public InformationEvent(String txt) {
     if (txt == null) throw new Error("Cannot initialise InformationEvent with null!");
     _text = txt;
+    _kind = InformationKind.FEEDBACK;
+  }
+
+  public InformationEvent(String txt, InformationKind kind) {
+    if (txt == null) throw new Error("Cannot initialise InformationEvent with null!");
+    _text = txt;
+    _kind = kind;
   }
 
   public EventKind queryEventKind() {
     return EventKind.INFORMATION;
+  }
+
+  public InformationKind queryInformationKind() {
+    return _kind;
   }
 
   public String queryText() {

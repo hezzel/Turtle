@@ -23,6 +23,7 @@ import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.OutputTarget;
 import turtle.styles.AnsiColour;
+import turtle.styles.DefaultColour;
 import turtle.styles.RGBAColour;
 import turtle.styles.AttributeGroup;
 import turtle.styles.ColourString;
@@ -78,10 +79,17 @@ public class InformationHandler implements EventListener {
     _target.print(new ColourString(event.queryText()));
   }
 
-  private void handleInformation(InformationEvent event) {
+  private AttributeGroup queryInformationAttributes(InformationEvent event) {
+    if (event.queryInformationKind() == InformationEvent.InformationKind.TELNET) {
+      return new AttributeGroup(new DefaultColour(false, true));
+    }
+    // default -- for instance FEEDBACK
     AnsiColour colour = new AnsiColour(AnsiColour.COL_GREEN, true);
-    AttributeGroup ag = new AttributeGroup(colour, AttributeGroup.ATT_ITALIC);
-    _target.print(new ColourString(event.queryText() + "\n", ag));
+    return new AttributeGroup(colour, AttributeGroup.ATT_ITALIC);
+  }
+
+  private void handleInformation(InformationEvent event) {
+    _target.print(new ColourString(event.queryText() + "\n", queryInformationAttributes(event)));
   }
 
   private void handleWarning(WarningEvent event) {

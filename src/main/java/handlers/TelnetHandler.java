@@ -52,10 +52,16 @@ public class TelnetHandler implements EventListener {
     return kind == TurtleEvent.EventKind.TELNET;
   }
 
+  private void sendEvent(String kind, TelnetCode code) {
+    String txt = "[" + kind + " telnet: " + telnetToString(code) + "]";
+    InformationEvent event = new InformationEvent(txt, InformationEvent.InformationKind.TELNET);
+    EventBus.eventOccurred(event);
+  }
+
   public void eventOccurred(TurtleEvent event) {
     TelnetEvent evt = (TelnetEvent)event;
     TelnetCode code = evt.queryTelnetCode();
-    EventBus.eventOccurred(new InformationEvent("[Received telnet: "+ telnetToString(code) + "]"));
+    sendEvent("Received", code);
     int command = code.queryCommand();
     int option = code.queryOption();
     // here handle codes we actually want to do something with
@@ -151,7 +157,7 @@ public class TelnetHandler implements EventListener {
 
   private void send(TelnetCode code) {
     _sender.sendTelnet(code);
-    EventBus.eventOccurred(new InformationEvent("[Sent telnet: " + telnetToString(code) + "]"));
+    sendEvent("Sent", code);
   }
 
   private void rejectWill(int option) {
