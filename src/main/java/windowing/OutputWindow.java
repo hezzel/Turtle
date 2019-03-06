@@ -26,6 +26,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import turtle.interfaces.immutable.CharacterLayout;
+import turtle.interfaces.immutable.LayoutedText;
 
 /**
  * This class represents the main window of Turtle, where text is printed to the user.
@@ -48,15 +50,15 @@ public class OutputWindow {
     _textpane.setFont(font);
   }
 
-  public void addText(String txt) {
-    StyledDocument doc = _textpane.getStyledDocument();
-    Style style = _textpane.getStyle("white");
-    if (style == null) {
-      style = _textpane.addStyle("white", null);
-      StyleConstants.setForeground(style, Color.white);
+  public void addText(LayoutedText text) {
+    for (int i = 0; i < text.numParts(); i++) {
+      CharacterLayout ag = text.getStyle(i);
+      String part = text.getPart(i);
+      Style style = ag.getStyle(_textpane);
+      StyledDocument doc = _textpane.getStyledDocument();
+      try { doc.insertString(doc.getLength(), part, style); }
+      catch (BadLocationException e) { } 
     }
-    try { doc.insertString(doc.getLength(), txt, style); }
-    catch (BadLocationException e) {}
   }
 
   public JComponent queryComponent() {

@@ -22,6 +22,10 @@ package turtle.handlers;
 import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.OutputTarget;
+import turtle.styles.AnsiColour;
+import turtle.styles.RGBAColour;
+import turtle.styles.AttributeGroup;
+import turtle.styles.ColourString;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
 import turtle.events.UserCommandEvent;
@@ -66,19 +70,24 @@ public class InformationHandler implements EventListener {
   }
 
   private void handleUserCommand(UserCommandEvent event) {
-    _target.print("USER: " + event.queryCommand() + "\n");
+    RGBAColour colour = new RGBAColour(255, 255, 120);
+    _target.print(new ColourString(event.queryCommand() + "\n", colour));
   }
 
   private void handleMudText(MudTextEvent event) {
-    _target.print("MUD: " + event.queryText() + "\n");
+    _target.print(new ColourString(event.queryText()));
   }
 
   private void handleInformation(InformationEvent event) {
-    _target.print("INFO: " + event.queryText() + "\n");
+    AnsiColour colour = new AnsiColour(AnsiColour.COL_GREEN, true);
+    AttributeGroup ag = new AttributeGroup(colour, AttributeGroup.ATT_ITALIC);
+    _target.print(new ColourString(event.queryText() + "\n", ag));
   }
 
   private void handleWarning(WarningEvent event) {
-    _target.print("WARNING: " + event.queryText() + "\n");
+    AnsiColour colour = new AnsiColour(AnsiColour.COL_RED, true);
+    AttributeGroup ag = new AttributeGroup(colour, AttributeGroup.ATT_BOLD);
+    _target.print(new ColourString(event.queryText() + "\n", ag));
   }
 }
 

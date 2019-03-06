@@ -17,15 +17,55 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.styles;
 
-import turtle.interfaces.immutable.LayoutedText;
+import java.awt.Color;
+import turtle.interfaces.immutable.Colour;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * A DefaultColour is either the default front or the default back; it may also be brightened.
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public class DefaultColour implements Colour {
+  private int _code;
+    /* 0: back, 1: front, 2: bright back, 3: bright front */
+
+  /** The palette is used to transform default colours into a normal Color object. */
+  private static Color _palette[] = new Color[] {
+    new Color(0,   0,   0  ),
+    new Color(205, 205, 205),
+    new Color(102, 102, 102),
+    new Color(255, 255, 255),
+  };
+
+  /**
+   * Creates a colour to represent:
+   * - the default background colour if front = false (brightened if bright is set to true)
+   * - the default foreground colour if front = true (same).
+   */
+  public DefaultColour(boolean front, boolean bright) {
+    _code = (bright ? 2 : 0) + (front ? 1 : 0);
+  }
+
+  public boolean equals(Object other) {
+    if (other instanceof DefaultColour) return _code == ((DefaultColour)other)._code;
+    return false;
+  }
+
+  public Color toJavaColor() {
+    return _palette[_code];
+  }
+
+  public String colourName() {
+    String[] names = { "defaultback", "defaultfront", "brightdefaultback", "brightdefaultfront" };
+    return names[_code];
+  }
+
+  public Colour brightenedColour() {
+    return new DefaultColour(_code % 2 == 1, true);
+  }
+
+  public Colour unbrightenedColour() {
+    return new DefaultColour(_code % 2 == 1, false);
+  }
 }
 

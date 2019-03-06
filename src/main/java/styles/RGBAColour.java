@@ -17,15 +17,52 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.styles;
 
-import turtle.interfaces.immutable.LayoutedText;
+import java.awt.Color;
+import turtle.interfaces.immutable.Colour;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * The RGBAColour class represents a class given by red/green/blue values, along with an "alpha"
+ * representing the transparency.  Such a Colour is not subject to (most) changes in settings,
+ * and cannot be brightened or unbrightened.
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public class RGBAColour implements Colour {
+  private Color _colorob;
+
+  public RGBAColour(Color base) {
+    _colorob = base;
+  }
+
+  public RGBAColour(int red, int green, int blue) {
+    _colorob = new Color(red, green, blue);
+  }
+
+  public boolean equals(Object other) {
+    if (other instanceof RGBAColour) return _colorob.equals(((RGBAColour)other)._colorob);
+    return false;
+  }
+
+  public Color toJavaColor() {
+    return _colorob;
+  }
+
+  private String hexify(int num) {
+    String ret = Integer.toHexString(num);
+    if (num < 16) ret = "0" + ret;
+    return ret;
+  }
+
+  public String colourName() {
+    return hexify(_colorob.getRed()) + hexify(_colorob.getGreen()) + hexify(_colorob.getBlue());
+  }
+
+  public Colour brightenedColour() {
+    return this;
+  }
+
+  public Colour unbrightenedColour() {
+    return this;
+  }
 }
 

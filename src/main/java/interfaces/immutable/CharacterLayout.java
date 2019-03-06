@@ -17,15 +17,33 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.interfaces.immutable;
 
-import turtle.interfaces.immutable.LayoutedText;
+import javax.swing.JTextPane;
+import javax.swing.text.Style;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * This class represents the collection of layout properties which a character (in a LayoutedText)
+ * can have.
+ * This includes things like foreground colour, background colour, bold and italic properties.
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public interface CharacterLayout {
+  Colour getFront();
+  Colour getBack();
+  boolean queryBold();
+  boolean queryItalic();
+  boolean queryUnderline();
+  boolean queryBlink();
+  boolean queryReverse();
+  boolean queryDim();
+  boolean queryInvisible();
+  boolean queryStrikethrough();
+
+  /**
+   * Returns a (java-internal) Style object representing this layout.
+   * The given JTextPane should be the text pane in which the style object
+   * will be used.
+   */
+  public Style getStyle(JTextPane ref);
 }
 

@@ -17,15 +17,58 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.styles;
 
+import java.awt.Color;
+import turtle.interfaces.immutable.Colour;
+import turtle.interfaces.immutable.CharacterLayout;
 import turtle.interfaces.immutable.LayoutedText;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * A ColourString is a layoutedtext with a uniform CharacterLayout (typically a single colour).
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public class ColourString implements LayoutedText {
+  private String _text;
+  private CharacterLayout _layout;
+
+  /** Creates a ColourString in the default colour. */
+  public ColourString(String str) {
+    _text = str;
+    _layout = new AttributeGroup();
+  }
+
+  /** Creates a ColourString with the given (foreground) colour. */
+  public ColourString(String str, Colour col) {
+    _text = str;
+    _layout = new AttributeGroup(col);
+  }
+
+  /** Creates a ColourString with the given character layout. */
+  public ColourString(String str, CharacterLayout layout) {
+    _text = str;
+    _layout = layout;
+  }
+
+  public int numParts() {
+    return 1;
+  }
+
+  public String getPart(int part) {
+    if (part == 0) return _text;
+    else throw new Error("Asking for part " + part + " in ColourString.");
+  }
+
+  public CharacterLayout getStyle(int part) {
+    if (part == 0) return _layout;
+    else throw new Error("Asking for style of part " + part + " in ColourString.");
+  }
+
+  public String getFullString() {
+    return _text;
+  }
+
+  public boolean isEmpty() {
+    return _text.equals("");
+  }
 }
 

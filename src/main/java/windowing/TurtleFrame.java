@@ -26,6 +26,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
 import static javax.swing.GroupLayout.Alignment.*;
+import turtle.interfaces.immutable.LayoutedText;
 import turtle.interfaces.OutputTarget;
 
 /**
@@ -115,9 +116,9 @@ public class TurtleFrame extends JFrame implements OutputTarget {
     System.exit(0);
   }
 
-  /** Prints the given information to the output window. */
-  public void print(String txt) {
-    _output.addText(txt);
+  /** Prints the given layouted text to the output window. */
+  public void print(LayoutedText text) {
+    _output.addText(text);
   }
 
   public TurtleFrame() {

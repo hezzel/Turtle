@@ -17,15 +17,45 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.interfaces.immutable;
 
-import turtle.interfaces.immutable.LayoutedText;
+import java.util.ArrayList;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * This class represents a string, along with layout for each of the characters.
+ * The layout consists of the foreground colour, background colour and a number of attributes.
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public interface LayoutedText {
+  /**
+   * Splitting the string into parts based on the respective attributes, this returns the number of
+   * parts.
+   * Each part has a uniform style and is as long a successive piece as possible with that style.
+   */
+  public int numParts();
+
+  /**
+   * Splitting the string into parts based on the respective attributes, this returns the part with
+   * the given index.
+   * The index must be in the range 0 ... numParts()-1
+   */
+  public String getPart(int part);
+
+  /**
+   * Splitting the string into parts based on the respective attributes, this returns the style of
+   * each part.
+   * The index must be in the range 0 ... numParts()-1
+   */
+  public CharacterLayout getStyle(int part);
+
+  /**
+   * This returns the plain text underlying this structure; all attributes and colours are removed.
+   */
+  public String getFullString();
+
+  /**
+   * This method returns whether the current text is empty.
+   * Equivalent to getFullString().equals("")
+   */
+  public boolean isEmpty();
 }
 

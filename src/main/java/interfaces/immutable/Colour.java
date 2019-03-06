@@ -17,15 +17,32 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.interfaces.immutable;
 
-import turtle.interfaces.immutable.LayoutedText;
+import java.awt.Color;
 
 /**
- * An OutputTarget (for instance a window or logfile) is passed any information that the user may
- * be interested in.
+ * The Colour class represents, unsurprisingly, a colour.
+ * This could be a colour given by a code (whose exact RGB representation may be decided by user
+ * settings or some well-chosen defaults) or just an RGB value.
  */
-public interface OutputTarget {
-  public void print(LayoutedText txt);
+public interface Colour {
+  /** Return a java.awt.Color representation of the Colour object. */
+  Color toJavaColor();
+
+  /** Return a unique string representation for the Colour object. */
+  String colourName();
+
+  /**
+   * Some kinds of Colours change when mixed with the STANDOUT attribute; others remain unaltered.
+   * This function returns the result of adding STANDOUT.
+   */
+  Colour brightenedColour();
+
+  /**
+   * Some kinds of Colours change when mixed with the STANDOUT attribute; others remain unaltered.
+   * This function returns the result of removing STANDOUT.
+   */
+  Colour unbrightenedColour();
 }
 
