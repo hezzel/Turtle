@@ -1,8 +1,8 @@
 basics
   [x] working client
   [x] working network connection (to Discworld)
-  [/] telnet negotiation (TODO: unit testing for the telnet handler; in particular TType negotiation, and separate a TelnetOutputStream)
-  support for ansi, xterm256, xterm16m
+  [x] telnet negotiation
+  [x] support for ansi, xterm256, xterm16m
   scrolling
   command parsing
 cool features
@@ -17,7 +17,7 @@ windowing
   changing colour schemes
   clever windowing system
 better telnet and connection
-  support for reconnecting (telnet handler should reset, especially the ansi stuff)
+  support for reconnecting (telnet handler should reset, especially the ansi stuff, and the information handler should refresh its reader)
   make telnet handler keep track of what it already said recently was supported (to avoid doubling up)
   mccp (compression)
   zmp
@@ -30,4 +30,5 @@ other useful or cool stuff
   help functionality
   make the numpad keys work
   make various kinds of information events optional (for users to enable or disable)
+  perhaps: make LayoutedText a cleaner interface (currently it's very implementation-oriented)
 

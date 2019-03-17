@@ -20,12 +20,14 @@
 package turtle.handlers;
 
 import turtle.interfaces.immutable.TurtleEvent;
+import turtle.interfaces.immutable.LayoutedText;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.OutputTarget;
 import turtle.styles.AnsiColour;
 import turtle.styles.DefaultColour;
 import turtle.styles.RGBAColour;
 import turtle.styles.AttributeGroup;
+import turtle.styles.AnsiCodeReader;
 import turtle.styles.ColourString;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
@@ -40,9 +42,11 @@ import turtle.events.WarningEvent;
  */
 public class InformationHandler implements EventListener {
   private OutputTarget _target;
+  private AnsiCodeReader _ansireader;
 
   public InformationHandler(OutputTarget output) {
     _target = output;
+    _ansireader = new AnsiCodeReader();
   }
 
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
@@ -76,7 +80,8 @@ public class InformationHandler implements EventListener {
   }
 
   private void handleMudText(MudTextEvent event) {
-    _target.print(new ColourString(event.queryText()));
+    LayoutedText txt = _ansireader.parse(event.queryText());
+    _target.print(txt);
   }
 
   private AttributeGroup queryInformationAttributes(InformationEvent event) {

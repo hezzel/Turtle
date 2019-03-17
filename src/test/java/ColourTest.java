@@ -24,6 +24,7 @@ import java.awt.Color;
 import turtle.styles.DefaultColour;
 import turtle.styles.AnsiColour;
 import turtle.styles.RGBAColour;
+import turtle.styles.XTermColour;
 import turtle.styles.AttributeGroup;
 import turtle.interfaces.immutable.Colour;
 import turtle.interfaces.immutable.CharacterLayout;
@@ -65,8 +66,41 @@ public class ColourTest {
     Colour a = new RGBAColour(10, 100, 200);
     Colour b = new RGBAColour(new Color(10, 100, 200));
     assertTrue(a.equals(b));
-    assertTrue(a.colourName().equals("0a64c8"));
+    assertTrue(a.colourName().equals("#0a64c8"));
     assertTrue(b.brightenedColour().equals(a.unbrightenedColour()));
+  }
+
+  @Test
+  public void testXTermBasics() {
+    Colour a = new XTermColour(3);
+    Colour b = new XTermColour(95);
+    Colour c = new XTermColour(2,1,1);
+    Colour d = new XTermColour(11);
+    Colour e = new XTermColour(240);
+    assertTrue(b.equals(c));
+    assertFalse(a.equals(b));
+    assertTrue(a.brightenedColour().equals(d));
+    assertTrue(d.unbrightenedColour().equals(a));
+    assertTrue(b.brightenedColour().equals(b));
+    assertTrue(e.brightenedColour().equals(e));
+    assertTrue(e.unbrightenedColour().equals(e));
+  }
+
+  @Test
+  public void testXTermToJava() {
+    // note that we do not require _specific_ values for the xterm colours; only that the RGB values
+    // and the greyscale values are set up correctly relative to each other
+    Color a = (new XTermColour(1,2,3)).toJavaColor();
+    Color b = (new XTermColour(0,5,3)).toJavaColor();
+    Color c = (new XTermColour(250)).toJavaColor();
+    Color d = (new XTermColour(252)).toJavaColor();
+    assertTrue(a.getRed() < a.getGreen());
+    assertTrue(a.getGreen() < a.getBlue());
+    assertTrue(b.getRed() == 0);
+    assertTrue(b.getGreen() == 255);
+    assertTrue(c.getRed() == c.getGreen());
+    assertTrue(c.getGreen() == c.getBlue());
+    assertTrue(d.getRed() > c.getRed());
   }
 
   @Test
