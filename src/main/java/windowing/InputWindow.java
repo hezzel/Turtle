@@ -22,37 +22,96 @@ package turtle.windowing;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.Font;
+import turtle.interfaces.windowing.InputWindowComponent;
+import turtle.interfaces.windowing.InputWindowEventListener;
 import turtle.EventBus;
 import turtle.events.UserCommandEvent;
 
-/**
- * This class represents the textbox at the bottom of Turtle, where users input text.
- */
-public class InputWindow {
-  JTextField _component;
+/** This class is a wrapper for the textbox at the bottom of Turtle, where users input text. */
+public class InputWindow implements InputWindowEventListener {
+  JComponent _component;
+  InputWindowComponent _iwc;
+  InputHistory _history;
 
   public InputWindow() {
-    _component = new JTextField();
-    _component.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "enterpressed");
-    _component.getActionMap().put("enterpressed", new AbstractAction() {
-        public void actionPerformed(ActionEvent tf) {
-          enterPressed();
-        }
-      });
+    InputWindowTextField x = new InputWindowTextField(this);
+      // takes care of nitty-gritty event handling
+    _component = x;
+    _iwc = x;
+    setupHistory();
   }
 
+  private InputWindow(InputWindowComponent iwc, InputHistory history) {
+    _component = null;
+    _iwc = iwc;
+    _history = history;
+  }
+
+  /**
+   * Exclusively used for unit testing!
+   * Note that this will create an InputWindow without explicit copmonent, so queryComponent()
+   * will return null.
+   */
+  public static InputWindow createTestWindow(InputWindowComponent comp, InputHistory hist) {
+    return new InputWindow(comp, hist);
+  }
+ 
   public void setFont(Font font) {
     _component.setFont(font);
   }
 
-  private void enterPressed() {
-    String text = _component.getText();
-    _component.setText("");
-    EventBus.eventOccurred(new UserCommandEvent(text));
-  }
-
   public JComponent queryComponent() {
     return _component;
+  }
+
+  /** Called by the InputWindowComponent when a relevant key event occurs. */
+  public void specialKeyEvent(int number) {
+    if (number == KeyEvent.VK_ENTER) enterPressed();
+    if (number == KeyEvent.VK_UP) historyBrowse(1);
+    if (number == KeyEvent.VK_DOWN) historyBrowse(-1);
+  }
+
+  /** Called by the InputWindowComponent when the text in the underlying textfield has changed. */
+  public void componentChanged() {
+    resetHistoryBrowsing();
+  }
+
+  private void enterPressed() {
+    String text = _iwc.getText();
+    _iwc.selectAll();
+    EventBus.eventOccurred(new UserCommandEvent(text));
+    _history.addHistoryItem(text);
+  }
+
+  private void setupHistory() {
+    _history = new InputHistory(100);
+  }
+
+  private void resetHistoryBrowsing() {
+    _history.resetBrowsing();
+  }
+
+  private void historyBrowse(int direction) {
+    // save current result in input history and immediately move to that point
+    // (inputhistory will make sure not to add it if it's just the last item)
+    if (_history.queryCurrent() == null) {
+      String text = _iwc.getText();
+      if (!text.equals("")) {
+        _history.addHistoryItem(text);
+        _history.browseUp();
+      }
+    }
+
+    String browseText;
+    if (direction > 0) {
+      browseText = _history.browseUp();
+    }
+    else {
+      browseText = _history.browseDown();
+      if (browseText == null) _iwc.changeText("");
+    }
+
+    if (browseText != null) _iwc.changeText(browseText);
   }
 }
 

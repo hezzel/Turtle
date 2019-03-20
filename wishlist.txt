@@ -3,6 +3,7 @@ basics
   [x] working network connection (to Discworld)
   [x] telnet negotiation
   [x] support for ansi, xterm256, xterm16m
+  [x] a clever input window that saves history
   scrolling
   command parsing
 cool features
