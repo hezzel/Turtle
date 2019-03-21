@@ -20,7 +20,7 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 
 import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
@@ -31,6 +31,10 @@ import turtle.windowing.InputHistory;
 import turtle.windowing.InputWindow;
 
 public class InputWindowTest {
+  private static final KeyStroke ENTERSTROKE = KeyStroke.getKeyStroke("ENTER");
+  private static final KeyStroke UPSTROKE = KeyStroke.getKeyStroke("UP");
+  private static final KeyStroke DOWNSTROKE = KeyStroke.getKeyStroke("DOWN");
+
   private class TestComponent implements InputWindowComponent {
     String _lastText;
     boolean _selected;
@@ -43,6 +47,8 @@ public class InputWindowTest {
     public String getText() { return _lastText; }
     public void changeText(String txt) { _lastText = txt; }
     public void selectAll() { _selected = false; }
+    public void registerSignificantKeystroke(KeyStroke k) {}
+    public void deregisterSignificantKeystroke(KeyStroke k) {}
   }
 
   private class TestListener implements EventListener {
@@ -76,7 +82,7 @@ public class InputWindowTest {
     window.componentChanged();
     component._lastText = "Hello world!";
     window.componentChanged();
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     assertTrue(listener._count == 1);
     assertTrue(listener._lastCommand.equals("Hello world!"));
     assertTrue(history.queryCurrent() == null);
@@ -89,18 +95,18 @@ public class InputWindowTest {
     TestComponent component = new TestComponent();
     InputWindow window = InputWindow.createTestWindow(component, history);
     component._lastText = "AAA";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "BBB";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "CCC";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     assertTrue(history.queryCurrent() == null);
     assertTrue(component._lastText.equals("CCC"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("BBB"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("AAA"));
-    window.specialKeyEvent(KeyEvent.VK_DOWN);
+    window.specialKeyEvent(DOWNSTROKE);
     assertTrue(component._lastText.equals("BBB"));
   }
 
@@ -112,14 +118,14 @@ public class InputWindowTest {
     InputWindow window = InputWindow.createTestWindow(component, history);
     // set up a basic history
     component._lastText = "AAA";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "BBB";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "CCC";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     // browse back to AAA
-    window.specialKeyEvent(KeyEvent.VK_UP);
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
+    window.specialKeyEvent(UPSTROKE);
     // change the window, then change it back for good measure
     component._lastText = "AAAx";
     window.componentChanged();
@@ -131,7 +137,7 @@ public class InputWindowTest {
     history.resetBrowsing();
     // after a return, the altered item should be added
     component._lastText = "AAAy";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     assertTrue(component._lastText.equals("AAAy"));
     assertTrue(history.queryCurrent() == null);
     assertTrue(history.browseUp().equals("AAAy"));
@@ -140,7 +146,6 @@ public class InputWindowTest {
     assertTrue(history.browseUp().equals("AAA"));
   }
 
-  /*
   @Test
   public void testResendOldCommand() {
     // create components
@@ -149,34 +154,33 @@ public class InputWindowTest {
     InputWindow window = InputWindow.createTestWindow(component, history);
     // set up a basic history
     component._lastText = "AAA";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "BBB";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "CCC";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     // resend CCC; this shouldn't add anything to history
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(ENTERSTROKE);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("BBB"));
-    window.specialKeyEvent(KeyEvent.VK_DOWN);
+    window.specialKeyEvent(DOWNSTROKE);
     assertTrue(component._lastText.equals("CCC"));
-    window.specialKeyEvent(KeyEvent.VK_DOWN);
+    window.specialKeyEvent(DOWNSTROKE);
     assertTrue(component._lastText.equals(""));
     // browse back to AAA and resend it; this should add to history
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     System.out.println("Now we have: " + component._lastText);
-    window.specialKeyEvent(KeyEvent.VK_UP);
-    window.specialKeyEvent(KeyEvent.VK_UP);
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(UPSTROKE);
+    window.specialKeyEvent(UPSTROKE);
+    window.specialKeyEvent(ENTERSTROKE);
     assertTrue(component._lastText.equals("AAA"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("CCC"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("BBB"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("AAA"));
   }
-  */
 
   @Test
   public void testSaveByBrowseDown() {
@@ -188,27 +192,27 @@ public class InputWindowTest {
     EventBus.registerEventListener(listener);
     // set up a basic history
     component._lastText = "AAA";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "BBB";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     component._lastText = "CCC";
-    window.specialKeyEvent(KeyEvent.VK_ENTER);
+    window.specialKeyEvent(ENTERSTROKE);
     // start typing something
     component._lastText = "Hi!";
     window.componentChanged();
     // now press the down key: this should save the last typed data to history
     // without sending anything
-    window.specialKeyEvent(KeyEvent.VK_DOWN);
+    window.specialKeyEvent(DOWNSTROKE);
     assertTrue(listener._count == 3);
     assertTrue(history.queryCurrent() == null);
     assertTrue(component._lastText.equals(""));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("Hi!"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("CCC"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("BBB"));
-    window.specialKeyEvent(KeyEvent.VK_UP);
+    window.specialKeyEvent(UPSTROKE);
     assertTrue(component._lastText.equals("AAA"));
   }
 }

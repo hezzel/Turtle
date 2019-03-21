@@ -19,6 +19,8 @@
 
 package turtle.interfaces.windowing;
 
+import javax.swing.KeyStroke;
+
 public interface InputWindowComponent {
   /** Returns the text that is currently in the underlying component. */
   String getText();
@@ -28,5 +30,17 @@ public interface InputWindowComponent {
 
   /** Selects all text in the component. */
   void selectAll();
+
+  /**
+   * Marks the given keystroke as one that any InputWindowEventListeners listening to the current
+   * component may wish to be informed of.
+   */
+  void registerSignificantKeystroke(KeyStroke k);
+
+  /**
+   * Marks the given keystroke as one that any InputWindowEventListeners listening to the current
+   * component do not need to be informed of.
+   */
+  void deregisterSignificantKeystroke(KeyStroke k);
 }
 

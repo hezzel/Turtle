@@ -29,9 +29,13 @@ import turtle.events.UserCommandEvent;
 
 /** This class is a wrapper for the textbox at the bottom of Turtle, where users input text. */
 public class InputWindow implements InputWindowEventListener {
-  JComponent _component;
-  InputWindowComponent _iwc;
-  InputHistory _history;
+  private JComponent _component;
+  private InputWindowComponent _iwc;
+  private InputHistory _history;
+
+  private static final KeyStroke ENTERSTROKE = KeyStroke.getKeyStroke("ENTER");
+  private static final KeyStroke UPSTROKE = KeyStroke.getKeyStroke("UP");
+  private static final KeyStroke DOWNSTROKE = KeyStroke.getKeyStroke("DOWN");
 
   public InputWindow() {
     InputWindowTextField x = new InputWindowTextField(this);
@@ -39,12 +43,14 @@ public class InputWindow implements InputWindowEventListener {
     _component = x;
     _iwc = x;
     setupHistory();
+    registerImportantKeys();
   }
 
   private InputWindow(InputWindowComponent iwc, InputHistory history) {
     _component = null;
     _iwc = iwc;
     _history = history;
+    registerImportantKeys();
   }
 
   /**
@@ -64,11 +70,17 @@ public class InputWindow implements InputWindowEventListener {
     return _component;
   }
 
+  private void registerImportantKeys() {
+    _iwc.registerSignificantKeystroke(ENTERSTROKE);
+    _iwc.registerSignificantKeystroke(UPSTROKE);
+    _iwc.registerSignificantKeystroke(DOWNSTROKE);
+  }
+
   /** Called by the InputWindowComponent when a relevant key event occurs. */
-  public void specialKeyEvent(int number) {
-    if (number == KeyEvent.VK_ENTER) enterPressed();
-    if (number == KeyEvent.VK_UP) historyBrowse(1);
-    if (number == KeyEvent.VK_DOWN) historyBrowse(-1);
+  public void specialKeyEvent(KeyStroke k) {
+    if (k.equals(ENTERSTROKE)) enterPressed();
+    if (k.equals(UPSTROKE)) historyBrowse(1);
+    if (k.equals(DOWNSTROKE)) historyBrowse(-1);
   }
 
   /** Called by the InputWindowComponent when the text in the underlying textfield has changed. */

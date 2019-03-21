@@ -19,12 +19,14 @@
 
 package turtle.interfaces.windowing;
 
+import javax.swing.KeyStroke;
+
 public interface InputWindowEventListener {
   /**
-   * Called when a key is pressed that is considered signifcant, and not already handled by the
-   * textfield itself.
+   * Called when a key is pressed that is considered signifcant (for example one that has been
+   * registered as such), and not already handled by the textfield itself.
    */
-  void specialKeyEvent(int keyEvent);
+  void specialKeyEvent(KeyStroke keystroke);
 
   /** Called when the text field that we are listening to is being changed. */
   void componentChanged();

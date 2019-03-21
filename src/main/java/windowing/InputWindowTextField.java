@@ -27,7 +27,7 @@ import turtle.interfaces.windowing.InputWindowComponent;
 import turtle.interfaces.windowing.InputWindowEventListener;
 
 /**
- * This class represents the textbox at the bottom of Turtle, where users input text.
+ * This class is a wrapper for the textbox at the bottom of Turtle, where users input text.
  * Aside from being a textfield, the class has little functionality; all relevant events are
  * passed on to the listening object.
  */
@@ -41,7 +41,6 @@ public class InputWindowTextField extends JTextField implements InputWindowCompo
     _allowChangeEvents = true;
 
     setupDocumentListener();
-    setupKeyMappings();
   }
 
   public void changeText(String text) {
@@ -67,24 +66,21 @@ public class InputWindowTextField extends JTextField implements InputWindowCompo
   }
 
   private class KeyAction extends AbstractAction {
-    int number;
-    public KeyAction(int num) { number = num; }
+    KeyStroke keystroke;
+    public KeyAction(KeyStroke k) { keystroke = k; }
     public void actionPerformed(ActionEvent tf) {
-      _listener.specialKeyEvent(number);
+      _listener.specialKeyEvent(keystroke);
     }
   }
 
-  private void setupKey(String stroke, int code) {
-    getInputMap().put(KeyStroke.getKeyStroke(stroke), "action " + code);
-    getActionMap().put("action " + code, new KeyAction(code));
+  public void registerSignificantKeystroke(KeyStroke k) {
+    System.out.println("Current: " + getInputMap().get(k));
+    getInputMap().put(k, "action " + k.toString());
+    getActionMap().put("action " + k.toString(), new KeyAction(k));
   }
- 
-  private void setupKeyMappings() {
-    setupKey("ENTER", KeyEvent.VK_ENTER);
-    setupKey("UP", KeyEvent.VK_UP);
-    setupKey("KP_UP", KeyEvent.VK_UP);
-    setupKey("DOWN", KeyEvent.VK_DOWN);
-    setupKey("KP_DOWN", KeyEvent.VK_DOWN);
+
+  public void deregisterSignificantKeystroke(KeyStroke k) {
+    getInputMap().remove(k);
   }
 }
 
