@@ -25,7 +25,7 @@ import java.awt.Font;
 import turtle.interfaces.windowing.InputWindowComponent;
 import turtle.interfaces.windowing.InputWindowEventListener;
 import turtle.EventBus;
-import turtle.events.UserCommandEvent;
+import turtle.events.UserInputEvent;
 
 /** This class is a wrapper for the textbox at the bottom of Turtle, where users input text. */
 public class InputWindow implements InputWindowEventListener {
@@ -91,7 +91,7 @@ public class InputWindow implements InputWindowEventListener {
   private void enterPressed() {
     String text = _iwc.getText();
     _iwc.selectAll();
-    EventBus.eventOccurred(new UserCommandEvent(text));
+    EventBus.eventOccurred(new UserInputEvent(text));
     _history.addHistoryItem(text);
   }
 

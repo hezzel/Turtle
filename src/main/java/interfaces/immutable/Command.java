@@ -17,42 +17,17 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.interfaces.immutable;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+/**
+ * A Command is something initiated by the user, whether it be through the input window, a macro,
+ * trigger, menu item or whatever.
+ * Various event listeners are interested in particular kinds of Command.
+ */
+public interface Command {
+  public enum CommandKind { MUDCMD,     // UserCommand: send a command to the MUD
+                            CONNECTCMD, // ConnectCommand: #connect to a server and port
+                          };
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    TelnetHandler telh = new TelnetHandler(conh);
-    EventBus.registerEventListener(telh);
-    CommandParsingHandler cph = new CommandParsingHandler();
-    EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
-  }
-
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
-
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
-  }
+  public CommandKind queryCommandKind();
 }
-

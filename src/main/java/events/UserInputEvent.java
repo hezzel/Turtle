@@ -17,42 +17,28 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.events;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+import turtle.interfaces.immutable.TurtleEvent;
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    TelnetHandler telh = new TelnetHandler(conh);
-    EventBus.registerEventListener(telh);
-    CommandParsingHandler cph = new CommandParsingHandler();
-    EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
+/**
+ * This class represents the event that the user has given some input to be parsed and executed,
+ * whether that be through the input window or through other input methods (such as menus or
+ * inputfiles).
+ */
+public class UserInputEvent implements TurtleEvent {
+  private String _command;
+
+  public UserInputEvent(String cmd) {
+    if (cmd == null) throw new Error("Cannot initialise UserInputEvent with null!");
+    _command = cmd;
   }
 
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+  public EventKind queryEventKind() {
+    return EventKind.USERINPUT;
+  }
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
+  public String queryCommand() {
+    return _command;
   }
 }
-

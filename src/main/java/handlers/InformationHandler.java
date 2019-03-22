@@ -31,7 +31,7 @@ import turtle.styles.AnsiCodeReader;
 import turtle.styles.ColourString;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
-import turtle.events.UserCommandEvent;
+import turtle.events.UserInputEvent;
 import turtle.events.WarningEvent;
 
 /**
@@ -50,15 +50,15 @@ public class InformationHandler implements EventListener {
   }
 
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.USERCMD ||
+    return kind == TurtleEvent.EventKind.USERINPUT ||
            kind == TurtleEvent.EventKind.MUDTEXT ||
            kind == TurtleEvent.EventKind.INFORMATION ||
            kind == TurtleEvent.EventKind.WARNING;
   }
 
   public void eventOccurred(TurtleEvent event) {
-    if (event.queryEventKind() == TurtleEvent.EventKind.USERCMD) {
-      handleUserCommand((UserCommandEvent)event);
+    if (event.queryEventKind() == TurtleEvent.EventKind.USERINPUT) {
+      handleUserInput((UserInputEvent)event);
     }
 
     if (event.queryEventKind() == TurtleEvent.EventKind.MUDTEXT) {
@@ -74,7 +74,7 @@ public class InformationHandler implements EventListener {
     }
   }
 
-  private void handleUserCommand(UserCommandEvent event) {
+  private void handleUserInput(UserInputEvent event) {
     RGBAColour colour = new RGBAColour(255, 255, 120);
     _target.print(new ColourString(event.queryCommand() + "\n", colour));
   }

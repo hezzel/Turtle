@@ -39,13 +39,13 @@ public class ListenerTest {
 
     public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
       if (_allowAll) return true;
-      else return kind == TurtleEvent.EventKind.USERCMD;
+      else return kind == TurtleEvent.EventKind.USERINPUT;
     }
 
     public void eventOccurred(TurtleEvent event) {
       _called++;
-      if (event.queryEventKind() == TurtleEvent.EventKind.USERCMD) {
-        _lastCommand = ((UserCommandEvent)event).queryCommand();
+      if (event.queryEventKind() == TurtleEvent.EventKind.USERINPUT) {
+        _lastCommand = ((UserInputEvent)event).queryCommand();
       }
     }
 
@@ -63,9 +63,9 @@ public class ListenerTest {
     Listener l = new Listener();
 
     EventBus.registerEventListener(l);
-    EventBus.eventOccurred(new UserCommandEvent("X"));
+    EventBus.eventOccurred(new UserInputEvent("X"));
     assertTrue(l.queryCallCount() == 1);
-    EventBus.eventOccurred(new UserCommandEvent("Y"));
+    EventBus.eventOccurred(new UserInputEvent("Y"));
     assertTrue(l.queryCallCount() == 2);
     assertTrue(l.queryLastCommand().equals("Y"));
     EventBus.eventOccurred(new MudTextEvent("Z"));
@@ -75,8 +75,8 @@ public class ListenerTest {
     EventBus.eventOccurred(new MudTextEvent("A"));
     assertTrue(l.queryCallCount() == 3);
     assertTrue(l.queryLastCommand().equals("Y"));
-    EventBus.eventOccurred(new UserCommandEvent("A"));
+    EventBus.eventOccurred(new UserInputEvent("A"));
     assertTrue(l.queryCallCount() == 4);
-    EventBus.eventOccurred(new UserCommandEvent("A"));
+    EventBus.eventOccurred(new UserInputEvent("A"));
   }
 }

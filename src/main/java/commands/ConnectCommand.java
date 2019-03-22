@@ -17,42 +17,29 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.commands;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+import turtle.interfaces.immutable.Command;
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    TelnetHandler telh = new TelnetHandler(conh);
-    EventBus.registerEventListener(telh);
-    CommandParsingHandler cph = new CommandParsingHandler();
-    EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
+public class ConnectCommand implements Command {
+  String _host;
+  int _port;
+
+  public ConnectCommand(String host, int port) {
+    if (host == null) throw new Error("ConnectCommand given an empty host.");
+    _host = host;
+    _port = port;
   }
 
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+  public CommandKind queryCommandKind() {
+    return CommandKind.CONNECTCMD;
+  }
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
+  public String queryHost() {
+    return _host;
+  }
+
+  public int queryPort() {
+    return _port;
   }
 }
-

@@ -26,7 +26,7 @@ import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
 import turtle.interfaces.windowing.InputWindowComponent;
 import turtle.EventBus;
-import turtle.events.UserCommandEvent;
+import turtle.events.UserInputEvent;
 import turtle.windowing.InputHistory;
 import turtle.windowing.InputWindow;
 
@@ -61,12 +61,12 @@ public class InputWindowTest {
     }
 
     public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-      return kind == TurtleEvent.EventKind.USERCMD;
+      return kind == TurtleEvent.EventKind.USERINPUT;
     }
 
     public void eventOccurred(TurtleEvent event) {
       _count++;
-      _lastCommand = ((UserCommandEvent)event).queryCommand();
+      _lastCommand = ((UserInputEvent)event).queryCommand();
     }
   }
 

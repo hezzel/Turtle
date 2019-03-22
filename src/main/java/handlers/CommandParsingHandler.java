@@ -17,42 +17,34 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.handlers;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+import turtle.interfaces.immutable.Command;
+import turtle.interfaces.immutable.TurtleEvent;
+import turtle.interfaces.EventListener;
+import turtle.EventBus;
+import turtle.events.UserInputEvent;
+import turtle.events.CommandEvent;
+import turtle.commands.*;
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    TelnetHandler telh = new TelnetHandler(conh);
-    EventBus.registerEventListener(telh);
-    CommandParsingHandler cph = new CommandParsingHandler();
-    EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
+/**
+ * The Command Parsing Handler listens for UserInput events and parses the corresponding command
+ * into a TurtleCommand, which can be executed by the relevant handler.
+ */
+public class CommandParsingHandler implements EventListener {
+  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
+    return kind == TurtleEvent.EventKind.USERINPUT;
   }
 
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+  public void eventOccurred(TurtleEvent event) {
+    UserInputEvent e = (UserInputEvent)event;
+    String txt = e.queryCommand();
+    Command cmd = parseInput(txt);
+    if (cmd != null) EventBus.eventOccurred(new CommandEvent(cmd));
+  }
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
+  private Command parseInput(String text) {
+    return new MudCommand(text);
   }
 }
 

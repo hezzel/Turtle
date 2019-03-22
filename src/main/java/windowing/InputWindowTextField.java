@@ -74,7 +74,6 @@ public class InputWindowTextField extends JTextField implements InputWindowCompo
   }
 
   public void registerSignificantKeystroke(KeyStroke k) {
-    System.out.println("Current: " + getInputMap().get(k));
     getInputMap().put(k, "action " + k.toString());
     getActionMap().put("action " + k.toString(), new KeyAction(k));
   }

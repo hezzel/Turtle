@@ -17,42 +17,23 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle;
+package turtle.commands;
 
-import javax.swing.UIManager;
-import javax.swing.JFrame;
-import turtle.windowing.TurtleFrame;
-import turtle.handlers.*;
+import turtle.interfaces.immutable.Command;
 
-public class Turtle {
-  private static void setupListeners(TurtleFrame frame) {
-    InformationHandler infh = new InformationHandler(frame);
-    EventBus.registerEventListener(infh);
-    ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
-    TelnetHandler telh = new TelnetHandler(conh);
-    EventBus.registerEventListener(telh);
-    CommandParsingHandler cph = new CommandParsingHandler();
-    EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
+/** A MudCommand is a string to be sent to the server. */
+public class MudCommand implements Command {
+  String _cmd;
+
+  public MudCommand(String text) {
+    _cmd = text;
   }
 
-  public static void main(String[] args) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          UIManager.setLookAndFeel(
-             UIManager.getSystemLookAndFeelClassName());
+  public CommandKind queryCommandKind() {
+    return CommandKind.MUDCMD;
+  }
 
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        TurtleFrame frame = new TurtleFrame();
-        setupListeners(frame);
-        frame.setVisible(true);
-      }
-    });
+  public String queryText() {
+    return _cmd;
   }
 }
-

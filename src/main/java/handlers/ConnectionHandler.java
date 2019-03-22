@@ -20,6 +20,7 @@
 package turtle.handlers;
 
 import java.awt.EventQueue;
+import turtle.interfaces.immutable.Command;
 import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.EventListener;
@@ -29,8 +30,10 @@ import turtle.EventBus;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
 import turtle.events.TelnetEvent;
-import turtle.events.UserCommandEvent;
+import turtle.events.CommandEvent;
 import turtle.events.WarningEvent;
+import turtle.commands.ConnectCommand;
+import turtle.commands.MudCommand;
 import turtle.connection.Connection;
 
 /**
@@ -61,12 +64,21 @@ public class ConnectionHandler implements EventListener, ConnectionListener, Tel
   }
 
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.USERCMD;
+    return kind == TurtleEvent.EventKind.COMMAND;
   }
 
   public void eventOccurred(TurtleEvent event) {
-    String cmd = ((UserCommandEvent)event).queryCommand();
-    if (_connection != null) _connection.send(cmd);
+    Command cmd = ((CommandEvent)event).queryCommand();
+    Command.CommandKind kind = cmd.queryCommandKind();
+    if (kind == Command.CommandKind.MUDCMD) handleMudCommand((MudCommand)cmd);
+    if (kind == Command.CommandKind.CONNECTCMD) handleConnectCommand((ConnectCommand)cmd);
+  }
+
+  /** Handles the command to #connect <host> <port> by calling createConnection. */
+  private void handleConnectCommand(ConnectCommand cmd) {
+    String host = cmd.queryHost();
+    int port = cmd.queryPort();
+    createConnection(host, port);
   }
 
   /**
@@ -91,6 +103,13 @@ public class ConnectionHandler implements EventListener, ConnectionListener, Tel
   /** Sends a warning event with the given text. */
   private void sendWarning(String txt) {
     sendEventOnQueue(new WarningEvent(txt));
+  }
+
+  /** Handles the given command by sending it to the server (if we are connected). */
+  private void handleMudCommand(MudCommand cmd) {
+    String txt = ((MudCommand)cmd).queryText();
+    if (_connection != null) _connection.send(txt);
+    else sendWarning("Cannot send command: no active connection.");
   }
 
   /** Called when connecting failed or the connection is broken improperly. */

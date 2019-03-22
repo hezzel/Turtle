@@ -20,24 +20,26 @@
 package turtle.events;
 
 import turtle.interfaces.immutable.TurtleEvent;
+import turtle.interfaces.immutable.Command;
 
 /**
- * This class represents the event that the user has given a command, whether that be through the
- * input window or through other input methods (such as menus or inputfiles).
+ * This class represents the event that the user has given a command in some way, which is the way
+ * they can influence Turtle.
+ * The command is already parsed into a Command.
  */
-public class UserCommandEvent implements TurtleEvent {
-  private String _command;
+public class CommandEvent implements TurtleEvent {
+  private Command _command;
 
-  public UserCommandEvent(String cmd) {
-    if (cmd == null) throw new Error("Cannot initialise UserCommandEvent with null!");
+  public CommandEvent(Command cmd) {
+    if (cmd == null) throw new Error("Cannot initialise CommandEvent with null!");
     _command = cmd;
   }
 
   public EventKind queryEventKind() {
-    return EventKind.USERCMD;
+    return EventKind.COMMAND;
   }
 
-  public String queryCommand() {
+  public Command queryCommand() {
     return _command;
   }
 }
