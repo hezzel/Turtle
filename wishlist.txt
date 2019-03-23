@@ -4,14 +4,16 @@ basics
   [x] telnet negotiation
   [x] support for ansi, xterm256, xterm16m
   [x] a clever input window that saves history
-  scrolling
   command parsing
+    * unit test the command parser (at least use of the separator for non-Turtle commands)
+    * implement connect command
+  scrolling
 cool features
   logfiles
+  macros
   aliases
   timers
   triggers
-  macros
   categories
 windowing
   clever input window

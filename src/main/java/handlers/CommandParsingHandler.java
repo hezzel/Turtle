@@ -21,30 +21,79 @@ package turtle.handlers;
 
 import turtle.interfaces.immutable.Command;
 import turtle.interfaces.immutable.TurtleEvent;
+import turtle.interfaces.CommandParser;
 import turtle.interfaces.EventListener;
 import turtle.EventBus;
-import turtle.events.UserInputEvent;
 import turtle.events.CommandEvent;
+import turtle.events.UserInputEvent;
+import turtle.events.WarningEvent;
 import turtle.commands.*;
 
 /**
  * The Command Parsing Handler listens for UserInput events and parses the corresponding command
  * into a TurtleCommand, which can be executed by the relevant handler.
  */
-public class CommandParsingHandler implements EventListener {
+public class CommandParsingHandler implements CommandParser, EventListener {
+  private static final char TURTLECHAR = '#';
+  private static final String SEPARATOR = ";;";
+
   public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
     return kind == TurtleEvent.EventKind.USERINPUT;
   }
 
   public void eventOccurred(TurtleEvent event) {
     UserInputEvent e = (UserInputEvent)event;
-    String txt = e.queryCommand();
-    Command cmd = parseInput(txt);
-    if (cmd != null) EventBus.eventOccurred(new CommandEvent(cmd));
+    execute(e.queryCommand());
   }
 
-  private Command parseInput(String text) {
-    return new MudCommand(text);
+  /**
+   * Executes a user command, which may contain the SEPARATOR (so can lead to one or more Command
+   * events if no error occurs).
+   */
+  private void execute(String txt) {
+    while (txt != null) {
+      int k = txt.indexOf(SEPARATOR);
+      String cmd;
+      if (k == -1) { cmd = txt; txt = null; }
+      else { cmd = txt.substring(0, k); txt = txt.substring(k + SEPARATOR.length()); }
+      Command command = parseSingleCommand(cmd);
+      if (command != null) EventBus.eventOccurred(new CommandEvent(command));
+    }
+  }
+
+  /** Parses a text without separators into a single Command. */
+  private Command parseSingleCommand(String text) {
+    String cmd = word(text, 0);
+    if (cmd.equals("") || cmd.charAt(0) != TURTLECHAR) return new MudCommand(text);
+    String maincmd = cmd.substring(1).toLowerCase();
+
+    //if (maincmd.equals("connect")) return ConnectCommand.parse(text, this);
+
+    EventBus.eventOccurred(new WarningEvent("Unknown Turtle command: " + text));
+    return null;
+  }
+
+  public String word(String command, int num) {
+    int i, j, len = command.length();
+    for (i = 0; i < len && command.charAt(i) == ' '; i++);
+    for (j = i; j < len && command.charAt(j) != ' '; j++);
+    if (i == len) return "";
+    if (j == len) {
+      if (num <= 0) return command.substring(i);
+      else return "";
+    }
+    if (num <= 0) return command.substring(i, j);
+    if (j == len-1) return "";
+    return word(command.substring(j+1), num-1);
+  }
+
+  public String wordsFrom(String command, int num) {
+    if (num <= 0) return command;
+    int i, j, len = command.length();
+    for (i = 0; i < len && command.charAt(i) == ' '; i++);
+    for (j = i; j < len && command.charAt(j) != ' '; j++);
+    if (j >= len-1) return ""; 
+    return wordsFrom(command.substring(j+1), num-1);
   }
 }
 
