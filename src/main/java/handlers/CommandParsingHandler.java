@@ -75,11 +75,12 @@ public class CommandParsingHandler implements CommandParser, EventListener {
 
   public String word(String command, int num) {
     int i, j, len = command.length();
+    if (num < 0) return null;
     for (i = 0; i < len && command.charAt(i) == ' '; i++);
     for (j = i; j < len && command.charAt(j) != ' '; j++);
     if (i == len) return "";
     if (j == len) {
-      if (num <= 0) return command.substring(i);
+      if (num == 0) return command.substring(i);
       else return "";
     }
     if (num <= 0) return command.substring(i, j);
@@ -88,9 +89,10 @@ public class CommandParsingHandler implements CommandParser, EventListener {
   }
 
   public String wordsFrom(String command, int num) {
-    if (num <= 0) return command;
+    if (num < 0) return command;
     int i, j, len = command.length();
     for (i = 0; i < len && command.charAt(i) == ' '; i++);
+    if (num == 0) return command.substring(i);
     for (j = i; j < len && command.charAt(j) != ' '; j++);
     if (j >= len-1) return ""; 
     return wordsFrom(command.substring(j+1), num-1);

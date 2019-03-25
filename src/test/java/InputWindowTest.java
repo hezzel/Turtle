@@ -169,7 +169,6 @@ public class InputWindowTest {
     assertTrue(component._lastText.equals(""));
     // browse back to AAA and resend it; this should add to history
     window.specialKeyEvent(UPSTROKE);
-    System.out.println("Now we have: " + component._lastText);
     window.specialKeyEvent(UPSTROKE);
     window.specialKeyEvent(UPSTROKE);
     window.specialKeyEvent(ENTERSTROKE);
