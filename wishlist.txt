@@ -4,7 +4,7 @@ basics
   [x] telnet negotiation
   [x] support for ansi, xterm256, xterm16m
   [x] a clever input window that saves history
-  [x] command parsing (TODO: complete support for #connect)
+  [x] command parsing
   scrolling
     * implement scroll command (up/down/toggle)
     * make output window listen for scroll command
