@@ -42,6 +42,14 @@ public class CommandParsingHandlerTest {
   }
 
   @Test
+  public void testQueryCommand() {
+    CommandParsingHandler handler = new CommandParsingHandler();
+    assertEquals(handler.queryCommand("#heLLo"), "hello");
+    assertEquals(handler.queryCommand("  #aa bb"), "aa");
+    assertTrue(handler.queryCommand("aa #bb") == null);
+  }
+
+  @Test
   public void testWord() {
     CommandParsingHandler handler = new CommandParsingHandler();
     String txt = "  aaa b af;j b  cccd .";
@@ -69,6 +77,17 @@ public class CommandParsingHandlerTest {
     assertTrue(handler.wordsFrom(txt, 5).equals("."));
     assertTrue(handler.wordsFrom(txt, 6).equals(""));
     assertTrue(handler.wordsFrom(txt, 7).equals(""));
+  }
+
+  @Test
+  public void testParseError() {
+    CommandParsingHandler handler = new CommandParsingHandler();
+    BoringListener listener = new BoringListener();
+    EventBus.registerEventListener(listener);
+
+    assertTrue(handler.parseError("Bing", "Bong") == null);
+    assertTrue(listener._occurred.size() == 1);
+    assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.WARNING);
   }
 
   @Test

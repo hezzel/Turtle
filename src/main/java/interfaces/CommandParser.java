@@ -19,10 +19,20 @@
 
 package turtle.interfaces;
 
+import turtle.interfaces.immutable.Command;
+
 /**
  * A CommandParser offers string analysis functionality to parse strings that represent commands.
  */
 public interface CommandParser {
+  /**
+   * Returns the command name for the given text, if any (or null if the given text does not define
+   * a Turtle command; for example "connect" if text is "#coNNect discworld.starturtle.net 4242" or
+   * "alias" if text is "#alias[mycategory] wait frimble waiting..." or null if text is "hello
+   * world".
+   */
+  public String queryCommand(String text);
+
   /** 
    * This parses the given text as a sequence of words, and returns number [num], or the empty
    * string if there are too few words.
@@ -47,5 +57,12 @@ public interface CommandParser {
    * @see word
    */
   public String wordsFrom(String command, int num);
+
+  /**
+   * May be called to throw a warning when the text could not be parsed as expected.
+   * This will raise an appropriate warning event.
+   * @return null (for easy returning).
+   */
+  public Command parseError(String text, String warning);
 }
 

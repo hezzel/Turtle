@@ -63,14 +63,19 @@ public class CommandParsingHandler implements CommandParser, EventListener {
 
   /** Parses a text without separators into a single Command. */
   private Command parseSingleCommand(String text) {
-    String cmd = word(text, 0);
-    if (cmd.equals("") || cmd.charAt(0) != TURTLECHAR) return new MudCommand(text);
-    String maincmd = cmd.substring(1).toLowerCase();
+    String cmd = queryCommand(text);
+    if (cmd == null) return new MudCommand(text);
 
-    //if (maincmd.equals("connect")) return ConnectCommand.parse(text, this);
+    if (cmd.equals("connect")) return ConnectCommand.parse(text, this);
 
     EventBus.eventOccurred(new WarningEvent("Unknown Turtle command: " + text));
     return null;
+  }
+
+  public String queryCommand(String text) {
+    String cmd = word(text, 0);
+    if (cmd.equals("") || cmd.charAt(0) != TURTLECHAR) return null;
+    else return cmd.substring(1).toLowerCase();
   }
 
   public String word(String command, int num) {
@@ -96,6 +101,11 @@ public class CommandParsingHandler implements CommandParser, EventListener {
     for (j = i; j < len && command.charAt(j) != ' '; j++);
     if (j >= len-1) return ""; 
     return wordsFrom(command.substring(j+1), num-1);
+  }
+
+  public Command parseError(String text, String warning) {
+    EventBus.eventOccurred(new WarningEvent("Parsing error: " + text));
+    return null;
   }
 }
 

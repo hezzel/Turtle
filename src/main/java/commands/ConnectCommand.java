@@ -20,10 +20,38 @@
 package turtle.commands;
 
 import turtle.interfaces.immutable.Command;
+import turtle.interfaces.CommandParser;
 
 public class ConnectCommand implements Command {
   String _host;
   int _port;
+
+  public static Command parse(String text, CommandParser parser) {
+    String host = parser.word(text, 1);
+    String port = parser.word(text, 2);
+    
+    if (!parser.queryCommand(text).equals("connect")) {
+      return parser.parseError(text, "ERROR: ConnectCommand command called when command is [" +
+                                     parser.queryCommand(text) + "]");
+    }
+    if (!parser.wordsFrom(text, 3).equals("")) {
+      return parser.parseError(text, "Expected at most 2 arguments in #connect (host and port).");
+    }
+    if (host.equals("")) {
+      return parser.parseError(text, "Expected at least 1 argument in #connect (host).");
+    }
+
+    int p;
+    if (port.equals("")) p = 23;
+    else {
+      try { p = Integer.parseInt(port); }
+      catch (NumberFormatException e) {
+        return parser.parseError(text, "Port should be numeric, but is [" + port + "]");
+      }
+    }
+    
+    return new ConnectCommand(host, p);
+  }
 
   public ConnectCommand(String host, int port) {
     if (host == null) throw new Error("ConnectCommand given an empty host.");
