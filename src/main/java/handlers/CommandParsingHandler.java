@@ -104,7 +104,7 @@ public class CommandParsingHandler implements CommandParser, EventListener {
   }
 
   public Command parseError(String text, String warning) {
-    EventBus.eventOccurred(new WarningEvent("Parsing error: " + text));
+    EventBus.eventOccurred(new WarningEvent("Parsing error: " + warning));
     return null;
   }
 }

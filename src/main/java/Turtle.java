@@ -34,8 +34,6 @@ public class Turtle {
     EventBus.registerEventListener(telh);
     CommandParsingHandler cph = new CommandParsingHandler();
     EventBus.registerEventListener(cph);
-    // temporary: move this to a menu or command once that's implemented
-    conh.createConnection("discworld.starturtle.net", 4242);
   }
 
   public static void main(String[] args) {
