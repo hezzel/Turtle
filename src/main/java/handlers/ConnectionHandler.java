@@ -63,15 +63,12 @@ public class ConnectionHandler implements EventListener, ConnectionListener, Tel
     }
   }
 
-  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.COMMAND;
-  }
-
-  public void eventOccurred(TurtleEvent event) {
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+    if (kind != TurtleEvent.EventKind.COMMAND) return;
     Command cmd = ((CommandEvent)event).queryCommand();
-    Command.CommandKind kind = cmd.queryCommandKind();
-    if (kind == Command.CommandKind.MUDCMD) handleMudCommand((MudCommand)cmd);
-    if (kind == Command.CommandKind.CONNECTCMD) handleConnectCommand((ConnectCommand)cmd);
+    Command.CommandKind cmdkind = cmd.queryCommandKind();
+    if (cmdkind == Command.CommandKind.MUDCMD) handleMudCommand((MudCommand)cmd);
+    if (cmdkind == Command.CommandKind.CONNECTCMD) handleConnectCommand((ConnectCommand)cmd);
   }
 
   /** Handles the command to #connect <host> <port> by calling createConnection. */

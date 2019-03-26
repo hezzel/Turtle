@@ -35,8 +35,7 @@ public class CommandParsingHandlerTest {
   private class BoringListener implements EventListener {
     ArrayList<TurtleEvent> _occurred;
     public BoringListener() { _occurred = new ArrayList<TurtleEvent>(); }
-    public boolean queryInterestedIn(TurtleEvent.EventKind kind) { return true; }
-    public void eventOccurred(TurtleEvent event) {
+    public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
       _occurred.add(event);
     }
   }
@@ -98,8 +97,7 @@ public class CommandParsingHandlerTest {
 
     String txt = "AAAAA;;  BBB ;;CD";
     TurtleEvent e = new UserInputEvent(txt);
-    assertTrue(handler.queryInterestedIn(e.queryEventKind()));
-    handler.eventOccurred(e);
+    handler.eventOccurred(e.queryEventKind(), e);
     assertTrue(listener._occurred.size() == 3);
 
     assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.COMMAND);
@@ -126,8 +124,7 @@ public class CommandParsingHandlerTest {
 
     String txt = "AAAAA;;  #BBB ;;CD";
     TurtleEvent e = new UserInputEvent(txt);
-    assertTrue(handler.queryInterestedIn(e.queryEventKind()));
-    handler.eventOccurred(e);
+    handler.eventOccurred(e.queryEventKind(), e);
     assertTrue(listener._occurred.size() == 3);
 
     assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.COMMAND);

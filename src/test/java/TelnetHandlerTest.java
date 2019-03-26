@@ -37,8 +37,7 @@ public class TelnetHandlerTest {
 
     public Listener() { _last = null; }
 
-    public boolean queryInterestedIn(TurtleEvent.EventKind kind) { return true; }
-    public void eventOccurred(TurtleEvent event) { _last = event; }
+    public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) { _last = event; }
     public TurtleEvent queryLast() { return _last; }
   }
 
@@ -64,7 +63,8 @@ public class TelnetHandlerTest {
   @Test
   public void testInformation() {
     TelnetCode code = new SingleTelnetCommand(TelnetCode.NOP);
-    _handler.eventOccurred(new TelnetEvent(code));
+    TelnetEvent evt = new TelnetEvent(code);
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     TurtleEvent last = _listener.queryLast();
     assertTrue(last != null);
     assertTrue(last instanceof InformationEvent);
@@ -107,7 +107,8 @@ public class TelnetHandlerTest {
   @Test
   public void testTTypeSupported() {
     TelnetCode code = new SupportTelnetCommand(TelnetCode.DO, 24);
-    _handler.eventOccurred(new TelnetEvent(code));
+    TelnetEvent evt = new TelnetEvent(code);
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     TelnetCode result = _sender.queryLast();
     assertTrue(result.queryCommand() == TelnetCode.WILL);
     assertTrue(result.queryOption() == 24);
@@ -120,27 +121,28 @@ public class TelnetHandlerTest {
     TelnetCode request = new SubNegotiationTelnetCommand(24, arr);
     String resultRepresentation;
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    TelnetEvent evt = new TelnetEvent(request);
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"ansi\" IAC SE"));
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"ansi\" IAC SE"));
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
 
-    _handler.eventOccurred(new TelnetEvent(request));
+    _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
   }

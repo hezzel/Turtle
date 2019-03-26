@@ -37,11 +37,8 @@ public class CommandParsingHandler implements CommandParser, EventListener {
   private static final char TURTLECHAR = '#';
   private static final String SEPARATOR = ";;";
 
-  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.USERINPUT;
-  }
-
-  public void eventOccurred(TurtleEvent event) {
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+    if (kind != TurtleEvent.EventKind.USERINPUT) return;
     UserInputEvent e = (UserInputEvent)event;
     execute(e.queryCommand());
   }
@@ -67,6 +64,7 @@ public class CommandParsingHandler implements CommandParser, EventListener {
     if (cmd == null) return new MudCommand(text);
 
     if (cmd.equals("connect")) return ConnectCommand.parse(text, this);
+    if (cmd.equals("scroll")) return ScrollCommand.parse(text, this);
 
     EventBus.eventOccurred(new WarningEvent("Unknown Turtle command: " + text));
     return null;

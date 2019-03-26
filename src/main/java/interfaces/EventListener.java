@@ -23,11 +23,9 @@ import turtle.interfaces.immutable.TurtleEvent;
 
 public interface EventListener {
   /**
-   * Will be checked every time an event occurs, so it is allowed for an event listener to change
-   * the output of this function during its lifetime.
+   * Will be called whenever an event is thrown onto the event bus.
+   * The kind is exactly event.queryEventKind(); it is given separately to allow for quick
+   * dismissal of any events that the current listener is not interested in.
    */
-  public boolean queryInterestedIn(TurtleEvent.EventKind kind);
-
-  /** Will be called whenever an event that we are interested in occurs. */
-  public void eventOccurred(TurtleEvent event);
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event);
 }

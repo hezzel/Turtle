@@ -34,9 +34,7 @@ public class EventBus {
   public static void eventOccurred(TurtleEvent event) {
     TurtleEvent.EventKind kind = event.queryEventKind();
     for (int i = 0; i < _listeners.size(); i++) {
-      if (_listeners.get(i).queryInterestedIn(kind)) {
-        _listeners.get(i).eventOccurred(event);
-      }
+      _listeners.get(i).eventOccurred(kind, event);
     }
   }
 

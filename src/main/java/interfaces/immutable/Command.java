@@ -27,6 +27,7 @@ package turtle.interfaces.immutable;
 public interface Command {
   public enum CommandKind { MUDCMD,     // UserCommand: send a command to the MUD
                             CONNECTCMD, // ConnectCommand: #connect to a server and port
+                            SCROLLCMD,  // ScrollCommand: #scroll {up|down|toggle}
                           };
 
   public CommandKind queryCommandKind();

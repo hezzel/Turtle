@@ -48,17 +48,14 @@ public class TelnetHandler implements EventListener {
     _lastTtype = null;
   }
 
-  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.TELNET;
-  }
-
   private void sendEvent(String kind, TelnetCode code) {
     String txt = "[" + kind + " telnet: " + telnetToString(code) + "]";
     InformationEvent event = new InformationEvent(txt, InformationEvent.InformationKind.TELNET);
     EventBus.eventOccurred(event);
   }
 
-  public void eventOccurred(TurtleEvent event) {
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+    if (kind != TurtleEvent.EventKind.TELNET) return;
     TelnetEvent evt = (TelnetEvent)event;
     TelnetCode code = evt.queryTelnetCode();
     sendEvent("Received", code);

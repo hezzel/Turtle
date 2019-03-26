@@ -49,27 +49,20 @@ public class InformationHandler implements EventListener {
     _ansireader = new AnsiCodeReader();
   }
 
-  public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-    return kind == TurtleEvent.EventKind.USERINPUT ||
-           kind == TurtleEvent.EventKind.MUDTEXT ||
-           kind == TurtleEvent.EventKind.INFORMATION ||
-           kind == TurtleEvent.EventKind.WARNING;
-  }
-
-  public void eventOccurred(TurtleEvent event) {
-    if (event.queryEventKind() == TurtleEvent.EventKind.USERINPUT) {
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+    if (kind == TurtleEvent.EventKind.USERINPUT) {
       handleUserInput((UserInputEvent)event);
     }
 
-    if (event.queryEventKind() == TurtleEvent.EventKind.MUDTEXT) {
+    if (kind == TurtleEvent.EventKind.MUDTEXT) {
       handleMudText((MudTextEvent)event);
     }
 
-    if (event.queryEventKind() == TurtleEvent.EventKind.INFORMATION) {
+    if (kind == TurtleEvent.EventKind.INFORMATION) {
       handleInformation((InformationEvent)event);
     }
 
-    if (event.queryEventKind() == TurtleEvent.EventKind.WARNING) {
+    if (kind == TurtleEvent.EventKind.WARNING) {
        handleWarning((WarningEvent)event);
     }
   }

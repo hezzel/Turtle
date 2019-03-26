@@ -60,11 +60,8 @@ public class InputWindowTest {
       _lastCommand = null;
     }
 
-    public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
-      return kind == TurtleEvent.EventKind.USERINPUT;
-    }
-
-    public void eventOccurred(TurtleEvent event) {
+    public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+      if (kind != TurtleEvent.EventKind.USERINPUT) return;
       _count++;
       _lastCommand = ((UserInputEvent)event).queryCommand();
     }

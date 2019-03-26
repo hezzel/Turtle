@@ -37,12 +37,13 @@ public class ListenerTest {
       _allowAll = true;
     }
 
-    public boolean queryInterestedIn(TurtleEvent.EventKind kind) {
+    private boolean queryInterestedIn(TurtleEvent.EventKind kind) {
       if (_allowAll) return true;
       else return kind == TurtleEvent.EventKind.USERINPUT;
     }
 
-    public void eventOccurred(TurtleEvent event) {
+    public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
+      if (!queryInterestedIn(kind)) return;
       _called++;
       if (event.queryEventKind() == TurtleEvent.EventKind.USERINPUT) {
         _lastCommand = ((UserInputEvent)event).queryCommand();
