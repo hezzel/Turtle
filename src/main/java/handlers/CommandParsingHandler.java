@@ -24,7 +24,6 @@ import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.CommandParser;
 import turtle.interfaces.EventListener;
 import turtle.EventBus;
-import turtle.events.CommandEvent;
 import turtle.events.UserInputEvent;
 import turtle.events.WarningEvent;
 import turtle.commands.*;
@@ -54,7 +53,7 @@ public class CommandParsingHandler implements CommandParser, EventListener {
       if (k == -1) { cmd = txt; txt = null; }
       else { cmd = txt.substring(0, k); txt = txt.substring(k + SEPARATOR.length()); }
       Command command = parseSingleCommand(cmd);
-      if (command != null) EventBus.eventOccurred(new CommandEvent(command));
+      if (command != null) EventBus.commandGiven(command);
     }
   }
 

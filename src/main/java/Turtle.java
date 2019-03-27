@@ -29,7 +29,7 @@ public class Turtle {
     InformationHandler infh = new InformationHandler(frame);
     EventBus.registerEventListener(infh);
     ConnectionHandler conh = new ConnectionHandler();
-    EventBus.registerEventListener(conh);
+    EventBus.registerCommandListener(conh);
     TelnetHandler telh = new TelnetHandler(conh);
     EventBus.registerEventListener(telh);
     CommandParsingHandler cph = new CommandParsingHandler();

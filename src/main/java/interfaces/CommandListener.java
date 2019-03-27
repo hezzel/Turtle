@@ -17,29 +17,16 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.events;
+package turtle.interfaces;
 
-import turtle.interfaces.immutable.TurtleEvent;
 import turtle.interfaces.immutable.Command;
 
-/**
- * This class represents the event that the user has given a command in some way, which is the way
- * they can influence Turtle.
- * The command is already parsed into a Command.
- */
-public class CommandEvent implements TurtleEvent {
-  private Command _command;
-
-  public CommandEvent(Command cmd) {
-    if (cmd == null) throw new Error("Cannot initialise CommandEvent with null!");
-    _command = cmd;
-  }
-
-  public EventKind queryEventKind() {
-    return EventKind.COMMAND;
-  }
-
-  public Command queryCommand() {
-    return _command;
-  }
+public interface CommandListener {
+  /**
+   * Will be called whenever a Command is created to be executed. This allows the listener to
+   * execute relevant commands.
+   * The kind is exactly command.queryCommandKind(); it is given separately to allow for quick
+   * dismissal of any commands that the current listener is not interested in.
+   */
+  public void commandGiven(Command.CommandKind kind, Command event);
 }

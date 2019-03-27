@@ -23,20 +23,29 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import turtle.interfaces.immutable.Command;
 import turtle.interfaces.immutable.TurtleEvent;
+import turtle.interfaces.CommandListener;
 import turtle.interfaces.EventListener;
 import turtle.EventBus;
-import turtle.events.CommandEvent;
 import turtle.events.UserInputEvent;
 import turtle.events.WarningEvent;
 import turtle.commands.MudCommand;
 import turtle.handlers.CommandParsingHandler;
 
 public class CommandParsingHandlerTest {
-  private class BoringListener implements EventListener {
-    ArrayList<TurtleEvent> _occurred;
-    public BoringListener() { _occurred = new ArrayList<TurtleEvent>(); }
+  private class BoringListener implements EventListener, CommandListener {
+    ArrayList<TurtleEvent> _events;
+    ArrayList<Command> _commands;
+    public BoringListener() {
+      _events = new ArrayList<TurtleEvent>();
+      _commands = new ArrayList<Command>();
+    }
     public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
-      _occurred.add(event);
+      _events.add(event);
+      _commands.add(null);
+    }
+    public void commandGiven(Command.CommandKind kind, Command command) {
+      _events.add(null);
+      _commands.add(command);
     }
   }
 
@@ -83,10 +92,11 @@ public class CommandParsingHandlerTest {
     CommandParsingHandler handler = new CommandParsingHandler();
     BoringListener listener = new BoringListener();
     EventBus.registerEventListener(listener);
+    EventBus.registerCommandListener(listener);
 
     assertTrue(handler.parseError("Bing", "Bong") == null);
-    assertTrue(listener._occurred.size() == 1);
-    assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.WARNING);
+    assertTrue(listener._events.size() == 1);
+    assertTrue(listener._events.get(0).queryEventKind() == TurtleEvent.EventKind.WARNING);
   }
 
   @Test
@@ -94,24 +104,22 @@ public class CommandParsingHandlerTest {
     CommandParsingHandler handler = new CommandParsingHandler();
     BoringListener listener = new BoringListener();
     EventBus.registerEventListener(listener);
+    EventBus.registerCommandListener(listener);
 
     String txt = "AAAAA;;  BBB ;;CD";
     TurtleEvent e = new UserInputEvent(txt);
     handler.eventOccurred(e.queryEventKind(), e);
-    assertTrue(listener._occurred.size() == 3);
+    assertTrue(listener._commands.size() == 3);
 
-    assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.COMMAND);
-    Command cmd = ((CommandEvent)listener._occurred.get(0)).queryCommand();
+    Command cmd = listener._commands.get(0);
     assertTrue(cmd.queryCommandKind() == Command.CommandKind.MUDCMD);
     assertTrue(((MudCommand)cmd).queryText().equals("AAAAA"));
 
-    assertTrue(listener._occurred.get(1).queryEventKind() == TurtleEvent.EventKind.COMMAND);
-    cmd = ((CommandEvent)listener._occurred.get(1)).queryCommand();
+    cmd = listener._commands.get(1);
     assertTrue(cmd.queryCommandKind() == Command.CommandKind.MUDCMD);
     assertTrue(((MudCommand)cmd).queryText().equals("  BBB "));
     
-    assertTrue(listener._occurred.get(2).queryEventKind() == TurtleEvent.EventKind.COMMAND);
-    cmd = ((CommandEvent)listener._occurred.get(2)).queryCommand();
+    cmd = listener._commands.get(2);
     assertTrue(cmd.queryCommandKind() == Command.CommandKind.MUDCMD);
     assertTrue(((MudCommand)cmd).queryText().equals("CD"));
   }
@@ -121,15 +129,16 @@ public class CommandParsingHandlerTest {
     CommandParsingHandler handler = new CommandParsingHandler();
     BoringListener listener = new BoringListener();
     EventBus.registerEventListener(listener);
+    EventBus.registerCommandListener(listener);
 
     String txt = "AAAAA;;  #BBB ;;CD";
     TurtleEvent e = new UserInputEvent(txt);
     handler.eventOccurred(e.queryEventKind(), e);
-    assertTrue(listener._occurred.size() == 3);
+    assertTrue(listener._events.size() == 3);
 
-    assertTrue(listener._occurred.get(0).queryEventKind() == TurtleEvent.EventKind.COMMAND);
-    assertTrue(listener._occurred.get(1).queryEventKind() == TurtleEvent.EventKind.WARNING);
-    assertTrue(listener._occurred.get(2).queryEventKind() == TurtleEvent.EventKind.COMMAND);
+    assertTrue(listener._events.get(0) == null);
+    assertTrue(listener._events.get(1).queryEventKind() == TurtleEvent.EventKind.WARNING);
+    assertTrue(listener._events.get(2) == null);
   }
 }
 

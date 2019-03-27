@@ -23,14 +23,13 @@ import java.awt.EventQueue;
 import turtle.interfaces.immutable.Command;
 import turtle.interfaces.immutable.TelnetCode;
 import turtle.interfaces.immutable.TurtleEvent;
-import turtle.interfaces.EventListener;
+import turtle.interfaces.CommandListener;
 import turtle.interfaces.ConnectionListener;
 import turtle.interfaces.TelnetSender;
 import turtle.EventBus;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
 import turtle.events.TelnetEvent;
-import turtle.events.CommandEvent;
 import turtle.events.WarningEvent;
 import turtle.commands.ConnectCommand;
 import turtle.commands.MudCommand;
@@ -40,7 +39,7 @@ import turtle.connection.Connection;
  * The Connection Handler manages connections to a remote server.
  * This is all done asynchronously, but the rest of the program does not need to consider that.
  */
-public class ConnectionHandler implements EventListener, ConnectionListener, TelnetSender {
+public class ConnectionHandler implements CommandListener, ConnectionListener, TelnetSender {
   Connection _connection;
 
   public ConnectionHandler() {
@@ -63,12 +62,9 @@ public class ConnectionHandler implements EventListener, ConnectionListener, Tel
     }
   }
 
-  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
-    if (kind != TurtleEvent.EventKind.COMMAND) return;
-    Command cmd = ((CommandEvent)event).queryCommand();
-    Command.CommandKind cmdkind = cmd.queryCommandKind();
-    if (cmdkind == Command.CommandKind.MUDCMD) handleMudCommand((MudCommand)cmd);
-    if (cmdkind == Command.CommandKind.CONNECTCMD) handleConnectCommand((ConnectCommand)cmd);
+  public void commandGiven(Command.CommandKind kind, Command command) {
+    if (kind == Command.CommandKind.MUDCMD) handleMudCommand((MudCommand)command);
+    if (kind == Command.CommandKind.CONNECTCMD) handleConnectCommand((ConnectCommand)command);
   }
 
   /** Handles the command to #connect <host> <port> by calling createConnection. */
