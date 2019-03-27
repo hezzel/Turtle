@@ -26,6 +26,7 @@ import turtle.interfaces.windowing.InputWindowComponent;
 import turtle.interfaces.windowing.InputWindowEventListener;
 import turtle.EventBus;
 import turtle.events.UserInputEvent;
+import turtle.commands.ScrollCommand;
 
 /** This class is a wrapper for the textbox at the bottom of Turtle, where users input text. */
 public class InputWindow implements InputWindowEventListener {
@@ -36,6 +37,10 @@ public class InputWindow implements InputWindowEventListener {
   private static final KeyStroke ENTERSTROKE = KeyStroke.getKeyStroke("ENTER");
   private static final KeyStroke UPSTROKE = KeyStroke.getKeyStroke("UP");
   private static final KeyStroke DOWNSTROKE = KeyStroke.getKeyStroke("DOWN");
+  private static final KeyStroke PAGEUPSTROKE = KeyStroke.getKeyStroke("PAGE_UP");
+  private static final KeyStroke PAGEDOWNSTROKE = KeyStroke.getKeyStroke("PAGE_DOWN");
+  private static final KeyStroke ALTSPACESTROKE = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
+                                                                         InputEvent.ALT_MASK);
 
   public InputWindow() {
     InputWindowTextField x = new InputWindowTextField(this);
@@ -74,6 +79,9 @@ public class InputWindow implements InputWindowEventListener {
     _iwc.registerSignificantKeystroke(ENTERSTROKE);
     _iwc.registerSignificantKeystroke(UPSTROKE);
     _iwc.registerSignificantKeystroke(DOWNSTROKE);
+    _iwc.registerSignificantKeystroke(PAGEUPSTROKE);
+    _iwc.registerSignificantKeystroke(PAGEDOWNSTROKE);
+    _iwc.registerSignificantKeystroke(ALTSPACESTROKE);
   }
 
   /** Called by the InputWindowComponent when a relevant key event occurs. */
@@ -81,6 +89,13 @@ public class InputWindow implements InputWindowEventListener {
     if (k.equals(ENTERSTROKE)) enterPressed();
     if (k.equals(UPSTROKE)) historyBrowse(1);
     if (k.equals(DOWNSTROKE)) historyBrowse(-1);
+    if (k.equals(PAGEUPSTROKE)) doScrolling(ScrollCommand.Direction.UP);
+    if (k.equals(PAGEDOWNSTROKE)) doScrolling(ScrollCommand.Direction.DOWN);
+    if (k.equals(ALTSPACESTROKE)) doScrolling(ScrollCommand.Direction.TOGGLE);
+  }
+
+  private void doScrolling(ScrollCommand.Direction direction) {
+    EventBus.commandGiven(new ScrollCommand(direction));
   }
 
   /** Called by the InputWindowComponent when the text in the underlying textfield has changed. */

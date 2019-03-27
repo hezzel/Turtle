@@ -17,16 +17,38 @@
 *   02111-1307  USA                                                                               *
 **************************************************************************************************/
 
-package turtle.interfaces;
+package turtle.commands;
 
 import turtle.interfaces.immutable.Command;
+import turtle.interfaces.CommandParser;
 
-public interface CommandListener {
-  /**
-   * Will be called whenever a Command is created to be executed. This allows the listener to
-   * execute relevant commands.
-   * The kind is exactly command.queryCommandKind(); it is given separately to allow for quick
-   * dismissal of any commands that the current listener is not interested in.
-   */
-  public void commandGiven(Command.CommandKind kind, Command command);
+public class ScrollCommand implements Command {
+  public enum Direction { UP, DOWN, TOGGLE };
+  Direction _direction;
+
+  public static Command parse(String text, CommandParser parser) {
+    if (!parser.queryCommand(text).equals("scroll")) {
+      return parser.parseError(text, "ERROR: ScrollCommand.parse called when command is [" +
+                                     parser.queryCommand(text) + "]");
+    }
+    String direction = parser.wordsFrom(text, 1).toLowerCase();
+    if (direction.equals("up")) return new ScrollCommand(Direction.UP);
+    if (direction.equals("down")) return new ScrollCommand(Direction.DOWN);
+    if (direction.equals("toggle")) return new ScrollCommand(Direction.TOGGLE);
+      return parser.parseError(text, "Unexpected argument [" + direction + "]: expected " +
+                                     "up, down or toggle.");
+  }
+
+  /** 1 = up, -1 = down, 0 = toggle scrolling */
+  public ScrollCommand(Direction direction) {
+    _direction = direction;
+  }
+
+  public CommandKind queryCommandKind() {
+    return CommandKind.SCROLLCMD;
+  }
+
+  public Direction queryDirection() {
+    return _direction;
+  }
 }

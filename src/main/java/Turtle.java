@@ -26,6 +26,7 @@ import turtle.handlers.*;
 
 public class Turtle {
   private static void setupListeners(TurtleFrame frame) {
+    EventBus.registerCommandListener(frame);
     InformationHandler infh = new InformationHandler(frame);
     EventBus.registerEventListener(infh);
     ConnectionHandler conh = new ConnectionHandler();

@@ -26,14 +26,17 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
 import static javax.swing.GroupLayout.Alignment.*;
+import turtle.interfaces.immutable.Command;
 import turtle.interfaces.immutable.LayoutedText;
+import turtle.interfaces.CommandListener;
 import turtle.interfaces.OutputTarget;
+import turtle.commands.ScrollCommand;
 
 /**
  * This class represents the main frame of Turtle.
  * Its responsibility is to show the appropriate windows to the user.
  */
-public class TurtleFrame extends JFrame implements OutputTarget {
+public class TurtleFrame extends JFrame implements OutputTarget, CommandListener {
   private InputWindow _input;
   private OutputWindow _output;
   private Font _font;
@@ -119,6 +122,17 @@ public class TurtleFrame extends JFrame implements OutputTarget {
   /** Prints the given layouted text to the output window. */
   public void print(LayoutedText text) {
     _output.addText(text);
+  }
+
+  /** Responds to Commands relevant to the windowing system. */
+  public void commandGiven(Command.CommandKind kind, Command command) {
+    if (kind == Command.CommandKind.SCROLLCMD) handleScrolling((ScrollCommand)command);
+  }
+
+  private void handleScrolling(ScrollCommand command) {
+    if (command.queryDirection() == ScrollCommand.Direction.UP) _output.scrollUp();
+    else if (command.queryDirection() == ScrollCommand.Direction.DOWN) _output.scrollDown();
+    else if (command.queryDirection() == ScrollCommand.Direction.TOGGLE) _output.scrollToggle();
   }
 
   public TurtleFrame() {
