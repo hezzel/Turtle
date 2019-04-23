@@ -1,0 +1,11 @@
+This is Turtle, a simple MUD client designed for Discworld MUD (but hopefully also useful for other
+MUDs).
+
+This is version 1.0.  It offers:
+* a very basic client with a somewhat clever input window (that stores history), a scrollable
+  output window, and a single connection accessed through the #connect <host> <port> command.
+* telnet support
+* ansi, xterm256 and xterm16m colour support
+
+Future development will explore many more features.
+
