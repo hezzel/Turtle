@@ -27,6 +27,7 @@ import turtle.interfaces.EventListener;
 import turtle.interfaces.TelnetSender;
 import turtle.EventBus;
 import turtle.connection.telnet.*;
+import turtle.events.DisconnectEvent;
 import turtle.events.InformationEvent;
 import turtle.events.TelnetEvent;
 import turtle.handlers.TelnetHandler;
@@ -137,6 +138,35 @@ public class TelnetHandlerTest {
     _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());
     assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"ansi\" IAC SE"));
+
+    _handler.eventOccurred(evt.queryEventKind(), evt);
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
+
+    _handler.eventOccurred(evt.queryEventKind(), evt);
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
+  }
+
+  @Test
+  public void testTtypeLoopWithReconnect() {
+    ArrayList<Integer> arr = new ArrayList<Integer>();
+    arr.add(1);
+    TelnetCode request = new SubNegotiationTelnetCommand(24, arr);
+    String resultRepresentation;
+
+    TelnetEvent evt = new TelnetEvent(request);
+
+    _handler.eventOccurred(evt.queryEventKind(), evt);
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm16m\" IAC SE"));
+
+    _handler.eventOccurred(evt.queryEventKind(), evt);
+    resultRepresentation = _handler.telnetToString(_sender.queryLast());
+    assertTrue(resultRepresentation.equals("IAC SB TTYPE IS \"xterm256\" IAC SE"));
+
+    DisconnectEvent devt = new DisconnectEvent(DisconnectEvent.DisconnectSource.USER);
+    _handler.eventOccurred(devt.queryEventKind(), devt);
 
     _handler.eventOccurred(evt.queryEventKind(), evt);
     resultRepresentation = _handler.telnetToString(_sender.queryLast());

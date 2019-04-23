@@ -65,6 +65,11 @@ public class InformationHandler implements EventListener {
     if (kind == TurtleEvent.EventKind.WARNING) {
        handleWarning((WarningEvent)event);
     }
+
+    // on disconnect, forget the current style or partial ansi codes
+    if (kind == TurtleEvent.EventKind.DISCONNECT) {
+      _ansireader = new AnsiCodeReader();
+    }
   }
 
   private void handleUserInput(UserInputEvent event) {

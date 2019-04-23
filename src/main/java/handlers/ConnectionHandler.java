@@ -27,6 +27,8 @@ import turtle.interfaces.CommandListener;
 import turtle.interfaces.ConnectionListener;
 import turtle.interfaces.TelnetSender;
 import turtle.EventBus;
+import turtle.events.ConnectEvent;
+import turtle.events.DisconnectEvent;
 import turtle.events.InformationEvent;
 import turtle.events.MudTextEvent;
 import turtle.events.TelnetEvent;
@@ -114,17 +116,22 @@ public class ConnectionHandler implements CommandListener, ConnectionListener, T
   /** Called when the connection is closed without errors. */
   public void connectionClosed(boolean remote) {
     if (remote) sendInformation("The remote server has closed the connection.");
+    DisconnectEvent.DisconnectSource source;
+    if (remote) source = DisconnectEvent.DisconnectSource.SERVER;
+    else source = DisconnectEvent.DisconnectSource.USER;
+    sendEventOnQueue(new DisconnectEvent(source));
     _connection = null;
   }
 
   /** Called when the connection has successfully been established. */
   public void connectionEstablished(String host, String address, int port) {
-    sendInformation("Connecting to " + address.toString() + " on port " + port + "...");
+    sendInformation("Connection established.");
+    sendEventOnQueue(new ConnectEvent());
   }
 
   /** Called when an IP address is found. */
   public void connectionFoundAddress(String host, String address, int port) {
-    sendInformation("Connection established.");
+    sendInformation("Connecting to " + address.toString() + " on port " + port + "...");
   }
 
   /**

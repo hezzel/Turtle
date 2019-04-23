@@ -27,6 +27,7 @@ import turtle.interfaces.EventListener;
 import turtle.interfaces.TelnetSender;
 import turtle.events.InformationEvent;
 import turtle.events.TelnetEvent;
+import turtle.events.DisconnectEvent;
 import turtle.connection.telnet.*;
 import turtle.EventBus;
 
@@ -54,9 +55,12 @@ public class TelnetHandler implements EventListener {
     EventBus.eventOccurred(event);
   }
 
-  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent event) {
-    if (kind != TurtleEvent.EventKind.TELNET) return;
-    TelnetEvent evt = (TelnetEvent)event;
+  public void eventOccurred(TurtleEvent.EventKind kind, TurtleEvent evt) {
+    if (kind == TurtleEvent.EventKind.TELNET) handleTelnetEvent((TelnetEvent)evt);
+    else if (kind == TurtleEvent.EventKind.DISCONNECT) handleDisconnectEvent((DisconnectEvent)evt);
+  }
+
+  private void handleTelnetEvent(TelnetEvent evt) {
     TelnetCode code = evt.queryTelnetCode();
     sendEvent("Received", code);
     int command = code.queryCommand();
@@ -67,6 +71,14 @@ public class TelnetHandler implements EventListener {
     if (command == TelnetCode.WILL) rejectWill(option);
     if (command == TelnetCode.WONT) acceptWont(option);
     if (command == TelnetCode.DO)   rejectDo(option);
+  }
+  
+  /**
+   * after a disconnect, stop remembering what the last ttype option we sent was, since we'll need
+   * a new one in future connections.
+   */
+  private void handleDisconnectEvent(DisconnectEvent evt) {
+    _lastTtype = null;
   }
 
   /**

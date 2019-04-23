@@ -5,11 +5,8 @@ basics
   [x] support for ansi, xterm256, xterm16m
   [x] a clever input window that saves history
   [x] command parsing
-  scrolling
-    * implement scroll command (up/down/toggle)
-    * make output window listen for scroll command
-    * make page up / page down / alt space cause scroll commands
-    * also put them in the command parsing handler
+  [x] scrolling
+  [x] support for disconnecting and reconnecting (resetting state in both the telnet handler and ansi code reader)
 cool features
   logfiles
   macros
@@ -22,10 +19,9 @@ windowing
   changing colour schemes
   clever windowing system
 better telnet and connection
-  support for reconnecting (telnet handler should reset, especially the ansi stuff, and the information handler should refresh its reader)
   make telnet handler keep track of what it already said recently was supported (to avoid doubling up)
-  mccp (compression)
   zmp
+  mccp (compression)
 other useful or cool stuff
   automapper
   tab completion
